@@ -1,0 +1,41 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Build
+dist/
+build/
+**/dist/
+**/build/
+*.tsbuildinfo
+# Frontend copiado al backend durante el build de Heroku
+backend/public/
+
+# Entorno / secretos
+.env
+.env.local
+*.env
+!.env.example
+
+# Base de datos SQLite
+*.sqlite
+*.sqlite3
+*.db
+data/
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Caddy
+caddy_data/
+caddy_config/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/

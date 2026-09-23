@@ -1,0 +1,16 @@
+{
+  "name": "fiesta-halloween",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web de registro y entradas para la fiesta de Halloween",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend install && npm --prefix backend run build",
+    "copy:frontend": "rm -rf backend/public && cp -r frontend/dist backend/public",
+    "heroku-postbuild": "npm run build:frontend && npm run copy:frontend && npm run build:backend",
+    "start": "node backend/dist/server.js"
+  }
+}
