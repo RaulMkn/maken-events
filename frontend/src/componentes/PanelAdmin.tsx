@@ -116,6 +116,10 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
             <div className="metrica-etiqueta">Pendientes</div>
           </div>
           <div className="metrica">
+            <div className="metrica-numero">{resumen.entrados}</div>
+            <div className="metrica-etiqueta">Ya dentro</div>
+          </div>
+          <div className="metrica">
             <div className="metrica-numero">{resumen.disfrazados}</div>
             <div className="metrica-etiqueta">Disfrazados</div>
           </div>
@@ -130,57 +134,84 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
       ) : asistentes.length === 0 ? (
         <p className="subtitulo">Todavía no hay nadie registrado.</p>
       ) : (
-        <div className="tabla-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Disfraz</th>
-                <th>Estado</th>
-                <th>Email</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {asistentes.map((a) => (
-                <tr key={a.id}>
-                  <td>
-                    {a.nombre} {a.apellidos}
-                  </td>
-                  <td>{a.email}</td>
-                  <td>{a.disfrazado ? (a.disfraz ?? 'Sí') : '—'}</td>
-                  <td>
-                    <span className={`etiqueta etiqueta-${a.estadoPago}`}>
-                      {a.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}
-                    </span>
-                  </td>
-                  <td>{a.emailEnviado ? '✅' : '—'}</td>
-                  <td>
-                    {a.estadoPago === 'pendiente' ? (
-                      <button
-                        className="boton boton-pequeno"
-                        onClick={() => onConfirmar(a)}
-                        disabled={accionEnCurso === a.id}
-                      >
-                        {accionEnCurso === a.id ? '…' : 'Confirmar pago'}
-                      </button>
-                    ) : (
-                      <button
-                        className="boton boton-secundario boton-pequeno"
-                        onClick={() => onReenviar(a)}
-                        disabled={accionEnCurso === a.id}
-                      >
-                        {accionEnCurso === a.id ? '…' : 'Reenviar entrada'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        agruparPorParte(asistentes).map(([grupo, lista]) => (
+          <div key={grupo}>
+            <div className="grupo-titulo">
+              <span className="grupo-nombre">De parte de {grupo}</span>
+              <span className="grupo-conteo">
+                {lista.length} {lista.length === 1 ? 'persona' : 'personas'}
+              </span>
+            </div>
+            <div className="tabla-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Disfraz</th>
+                    <th>Pago</th>
+                    <th>Email</th>
+                    <th>Entrada</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lista.map((a) => (
+                    <tr key={a.id}>
+                      <td>
+                        {a.nombre} {a.apellidos}
+                      </td>
+                      <td>{a.email}</td>
+                      <td>{a.disfrazado ? (a.disfraz ?? 'Sí') : '—'}</td>
+                      <td>
+                        <span className={`etiqueta etiqueta-${a.estadoPago}`}>
+                          {a.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}
+                        </span>
+                      </td>
+                      <td>{a.emailEnviado ? '✅' : '—'}</td>
+                      <td>{a.haEntrado ? '🟢 Dentro' : '—'}</td>
+                      <td>
+                        {a.estadoPago === 'pendiente' ? (
+                          <button
+                            className="boton boton-pequeno"
+                            onClick={() => onConfirmar(a)}
+                            disabled={accionEnCurso === a.id}
+                          >
+                            {accionEnCurso === a.id ? '…' : 'Confirmar pago'}
+                          </button>
+                        ) : (
+                          <button
+                            className="boton boton-secundario boton-pequeno"
+                            onClick={() => onReenviar(a)}
+                            disabled={accionEnCurso === a.id}
+                          >
+                            {accionEnCurso === a.id ? '…' : 'Reenviar entrada'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))
       )}
     </div>
   );
+}
+
+/**
+ * Agrupa los asistentes por "de parte de quién", ordenando los grupos
+ * alfabéticamente. Los que no tengan valor se agrupan bajo "Sin especificar".
+ */
+function agruparPorParte(asistentes: Asistente[]): [string, Asistente[]][] {
+  const grupos = new Map<string, Asistente[]>();
+  for (const a of asistentes) {
+    const clave = (a.deParteDe ?? '').trim() || 'Sin especificar';
+    const lista = grupos.get(clave) ?? [];
+    lista.push(a);
+    grupos.set(clave, lista);
+  }
+  return [...grupos.entries()].sort((x, y) => x[0].localeCompare(y[0], 'es'));
 }

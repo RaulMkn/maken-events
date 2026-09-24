@@ -14,13 +14,14 @@ interface RegistroBody {
   email: string;
   disfrazado: boolean;
   disfraz?: string;
+  deParteDe: string;
   aceptaCondiciones: boolean;
 }
 
 const registroSchema = {
   body: {
     type: 'object',
-    required: ['nombre', 'apellidos', 'email', 'disfrazado', 'aceptaCondiciones'],
+    required: ['nombre', 'apellidos', 'email', 'disfrazado', 'deParteDe', 'aceptaCondiciones'],
     additionalProperties: false,
     properties: {
       nombre: { type: 'string', minLength: 1, maxLength: 80 },
@@ -28,6 +29,8 @@ const registroSchema = {
       email: { type: 'string', minLength: 3, maxLength: 254 },
       disfrazado: { type: 'boolean' },
       disfraz: { type: 'string', maxLength: 200 },
+      // De parte de quién viene (texto libre, obligatorio): la fiesta es cerrada.
+      deParteDe: { type: 'string', minLength: 1, maxLength: 120 },
       // Debe ser exactamente true: no se acepta el registro sin aceptar condiciones.
       aceptaCondiciones: { type: 'boolean', const: true },
     },
@@ -50,9 +53,16 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
       const email = normalizarEmail(request.body.email);
       const disfrazado = request.body.disfrazado;
       const disfraz = disfrazado ? limpiarTexto(request.body.disfraz ?? '') : null;
+      const deParteDe = limpiarTexto(request.body.deParteDe);
 
       if (!emailValido(email)) {
         return reply.status(400).send({ error: 'El email no es válido.' });
+      }
+
+      if (deParteDe.length === 0) {
+        return reply
+          .status(400)
+          .send({ error: 'Indica de parte de quién vienes.' });
       }
 
       if (disfrazado && (!disfraz || disfraz.length === 0)) {
@@ -81,9 +91,9 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
 
       await pool.query(
         `INSERT INTO asistentes
-           (id, nombre, apellidos, email, disfrazado, disfraz, creado_en, acepto_condiciones_en)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [id, nombre, apellidos, email, disfrazado, disfraz, ahora, ahora],
+           (id, nombre, apellidos, email, disfrazado, disfraz, de_parte_de, creado_en, acepto_condiciones_en)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [id, nombre, apellidos, email, disfrazado, disfraz, deParteDe, ahora, ahora],
       );
 
       request.log.info({ asistenteId: id }, 'Nuevo registro');

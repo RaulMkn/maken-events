@@ -12,6 +12,7 @@ import { registroRoutes } from './routes/registro.js';
 import { authRoutes } from './routes/auth.js';
 import { adminRoutes } from './routes/admin.js';
 import { entradaRoutes } from './routes/entrada.js';
+import { staffRoutes } from './routes/staff.js';
 
 const app = Fastify({
   logger: {
@@ -74,6 +75,7 @@ await app.register(registroRoutes, { prefix: '/api' });
 await app.register(authRoutes, { prefix: '/api/admin' });
 await app.register(adminRoutes, { prefix: '/api/admin' });
 await app.register(entradaRoutes, { prefix: '/api' });
+await app.register(staffRoutes, { prefix: '/api/staff' });
 
 // ---- Frontend estático (SPA de React) ----
 // El build del frontend se copia a backend/public durante el build de Heroku.

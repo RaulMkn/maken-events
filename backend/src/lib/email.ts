@@ -118,6 +118,8 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
             <tr>
               <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
                 Guarda este correo. Tu entrada es personal e intransferible.<br>
+                <strong style="color:#ffa04d;">El QR solo sirve una vez:</strong> al escanearlo en la puerta queda usado.<br>
+                Si tienes cualquier problema con tu entrada, habla con maken.<br>
                 Nos vemos en la noche más terrorífica del año. 🎃
               </td>
             </tr>
@@ -134,7 +136,8 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
 Hola ${nombreCompleto}, tu pago está confirmado.
 Cuándo: viernes 31 de octubre, de 22:00 a 04:00.
 Dónde: C. Toledo, 36, Local 5, 28981 Parla (Madrid).
-Enseña el código QR adjunto en la puerta. Es personal e intransferible.`;
+Enseña el código QR adjunto en la puerta. Es personal e intransferible.
+El QR solo sirve una vez: al escanearlo queda usado. Ante cualquier problema, habla con maken.`;
 
   await transport.sendMail({
     from: remitente,

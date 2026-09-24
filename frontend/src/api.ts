@@ -11,8 +11,10 @@ export interface Asistente {
   email: string;
   disfrazado: boolean;
   disfraz: string | null;
+  deParteDe: string | null;
   estadoPago: 'pendiente' | 'pagado';
   emailEnviado: boolean;
+  haEntrado: boolean;
   creadoEn: string;
   pagadoEn: string | null;
 }
@@ -22,6 +24,7 @@ export interface ResumenAsistentes {
   pagados: number;
   pendientes: number;
   disfrazados: number;
+  entrados: number;
 }
 
 export interface DatosRegistro {
@@ -30,7 +33,18 @@ export interface DatosRegistro {
   email: string;
   disfrazado: boolean;
   disfraz?: string;
+  deParteDe: string;
   aceptaCondiciones: boolean;
+}
+
+export interface ResultadoVerificacion {
+  resultado: 'valida' | 'ya_entro' | 'invalida';
+  nombre?: string;
+  motivo?: string;
+  disfrazado?: boolean;
+  disfraz?: string | null;
+  deParteDe?: string | null;
+  entradoEn?: string | null;
 }
 
 class ApiError extends Error {
@@ -102,6 +116,29 @@ export function confirmarPago(
 
 export function reenviarEmail(id: string): Promise<{ ok: true; emailEnviado: boolean }> {
   return request(`/api/admin/asistentes/${id}/reenviar-email`, { method: 'POST' });
+}
+
+// ---- Staff (puerta) ----
+export function loginStaff(password: string): Promise<{ ok: true }> {
+  return request('/api/staff/login', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+}
+
+export function logoutStaff(): Promise<{ ok: true }> {
+  return request('/api/staff/logout', { method: 'POST' });
+}
+
+export function comprobarSesionStaff(): Promise<{ autenticado: boolean }> {
+  return request('/api/staff/sesion');
+}
+
+export function verificarEntrada(token: string): Promise<ResultadoVerificacion> {
+  return request('/api/staff/verificar', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
 }
 
 export { ApiError };

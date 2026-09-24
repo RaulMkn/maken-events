@@ -19,8 +19,10 @@ interface AsistenteDTO {
   email: string;
   disfrazado: boolean;
   disfraz: string | null;
+  deParteDe: string | null;
   estadoPago: 'pendiente' | 'pagado';
   emailEnviado: boolean;
+  haEntrado: boolean;
   creadoEn: string;
   pagadoEn: string | null;
 }
@@ -33,8 +35,10 @@ function aDTO(row: AsistenteRow): AsistenteDTO {
     email: row.email,
     disfrazado: row.disfrazado,
     disfraz: row.disfraz,
+    deParteDe: row.de_parte_de,
     estadoPago: row.estado_pago,
     emailEnviado: row.email_enviado,
+    haEntrado: row.ha_entrado,
     creadoEn: row.creado_en,
     pagadoEn: row.pagado_en,
   };
@@ -56,6 +60,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       pagados: asistentes.filter((a) => a.estadoPago === 'pagado').length,
       pendientes: asistentes.filter((a) => a.estadoPago === 'pendiente').length,
       disfrazados: asistentes.filter((a) => a.disfrazado).length,
+      entrados: asistentes.filter((a) => a.haEntrado).length,
     };
 
     return { resumen, asistentes };

@@ -44,16 +44,35 @@ body {
   color: var(--texto);
   min-height: 100vh;
   line-height: 1.6;
-  background-color: var(--negro);
-  /* Textura de fondo: dos halos de color (calabaza y morado) sobre negro,
-     más un patrón de puntos muy sutil que quita el aspecto "liso genérico". */
+  /* Tema neutro por defecto (home de eventos): azulado sobrio, sin Halloween. */
+  background-color: #0b0d14;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123, 47, 247, 0.25), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 15%, rgba(255, 122, 24, 0.18), transparent 55%),
-    radial-gradient(circle at 15% 85%, rgba(158, 240, 26, 0.06), transparent 40%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(90, 110, 160, 0.18), transparent 60%),
+    radial-gradient(circle at 85% 90%, rgba(90, 110, 160, 0.08), transparent 40%),
+    radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 22px 22px;
+  background-attachment: fixed;
+}
+
+/* Tema del evento Halloween: se aplica en el <div> raíz de sus páginas.
+   Reintroduce la paleta cálida y el fondo con halos de calabaza y morado. */
+.tema-halloween {
+  --naranja-claro: #ffa04d;
+  position: relative;
+}
+
+.tema-halloween::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--negro);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123, 47, 247, 0.28), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 15%, rgba(255, 122, 24, 0.2), transparent 55%),
+    radial-gradient(circle at 15% 85%, rgba(158, 240, 26, 0.07), transparent 40%),
     radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 100% 100%, 22px 22px;
-  background-attachment: fixed;
 }
 
 a {
@@ -506,4 +525,145 @@ tr:last-child td {
   html {
     scroll-behavior: auto;
   }
+}
+
+/* ---- Selector de eventos (home neutra) ---- */
+.eventos-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.evento-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  border-radius: var(--radio);
+  padding: 28px;
+  border: 1px solid var(--borde);
+  background: linear-gradient(160deg, #161a26, #0f121b);
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.evento-card--activo:hover {
+  transform: translateY(-3px);
+  border-color: var(--naranja);
+  box-shadow: 0 18px 50px -20px rgba(255, 122, 24, 0.5);
+}
+
+.evento-card--proximo {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.evento-emoji {
+  font-size: 2.6rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.evento-titulo {
+  font-family: var(--fuente-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.evento-meta {
+  color: var(--texto-tenue);
+  font-size: 0.95rem;
+}
+
+.evento-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.evento-badge--activo {
+  background: rgba(255, 122, 24, 0.15);
+  color: var(--naranja-claro);
+  border: 1px solid rgba(255, 122, 24, 0.35);
+}
+
+.evento-badge--proximo {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+}
+
+/* ---- Lector de QR (staff) ---- */
+.escaner-video {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radio);
+  border: 2px solid var(--borde-claro);
+  object-fit: cover;
+  background: #000;
+  margin: 0 auto;
+  display: block;
+}
+
+.resultado-scan {
+  text-align: center;
+  padding: 28px 20px;
+  border-radius: var(--radio);
+  margin-top: 8px;
+}
+
+.resultado-scan--valida {
+  background: rgba(74, 222, 128, 0.12);
+  border: 2px solid var(--verde);
+}
+
+.resultado-scan--ya_entro {
+  background: rgba(255, 214, 10, 0.12);
+  border: 2px solid var(--amarillo);
+}
+
+.resultado-scan--invalida {
+  background: rgba(255, 84, 112, 0.12);
+  border: 2px solid var(--rojo);
+}
+
+.resultado-icono {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.resultado-nombre {
+  font-family: var(--fuente-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* ---- Grupos del panel admin (por "de parte de quién") ---- */
+.grupo-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 28px 0 10px;
+  font-family: var(--fuente-serif);
+}
+
+.grupo-titulo .grupo-nombre {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--naranja-claro);
+}
+
+.grupo-titulo .grupo-conteo {
+  font-size: 0.85rem;
+  color: var(--texto-tenue);
 }

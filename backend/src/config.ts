@@ -61,6 +61,10 @@ export const config = {
     totpSecret: optional('ADMIN_TOTP_SECRET'),
   },
 
+  // Contraseña única y compartida para el equipo de puerta (staff).
+  // Login simple, sin MFA: solo sirve para escanear QR en la puerta.
+  staffPassword: optional('STAFF_PASSWORD'),
+
   // Email por SMTP (Gmail). Para Gmail necesitas una "contraseña de
   // aplicación" (App Password), no tu contraseña normal.
   email: {

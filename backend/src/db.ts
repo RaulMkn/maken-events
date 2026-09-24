@@ -34,12 +34,23 @@ export async function initDb(): Promise<void> {
       email_enviado BOOLEAN NOT NULL DEFAULT false,
       creado_en     TIMESTAMPTZ NOT NULL DEFAULT now(),
       pagado_en     TIMESTAMPTZ,
-      acepto_condiciones_en TIMESTAMPTZ
+      acepto_condiciones_en TIMESTAMPTZ,
+      de_parte_de   TEXT,
+      ha_entrado    BOOLEAN NOT NULL DEFAULT false,
+      entrado_en    TIMESTAMPTZ
     );
 
     CREATE INDEX IF NOT EXISTS idx_asistentes_email ON asistentes (email);
     CREATE INDEX IF NOT EXISTS idx_asistentes_token ON asistentes (token_qr);
   `);
+
+  // Migraciones idempotentes para bases de datos ya existentes (Heroku).
+  // Postgres soporta IF NOT EXISTS en ADD COLUMN, así que es seguro repetirlo.
+  await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS de_parte_de TEXT;`);
+  await pool.query(
+    `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS ha_entrado BOOLEAN NOT NULL DEFAULT false;`,
+  );
+  await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS entrado_en TIMESTAMPTZ;`);
 }
 
 export interface AsistenteRow {
@@ -55,4 +66,7 @@ export interface AsistenteRow {
   creado_en: string;
   pagado_en: string | null;
   acepto_condiciones_en: string | null;
+  de_parte_de: string | null;
+  ha_entrado: boolean;
+  entrado_en: string | null;
 }

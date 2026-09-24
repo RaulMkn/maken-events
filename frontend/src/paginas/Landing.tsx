@@ -5,8 +5,13 @@ import { Link } from 'react-router-dom';
  */
 export default function Landing() {
   return (
+    <div className="tema-halloween">
     <div className="contenedor">
       <header className="centrado aparece" style={{ marginBottom: 40 }}>
+        <Link to="/" className="subtitulo" style={{ fontSize: '0.9rem', display: 'inline-block', marginBottom: 16 }}>
+          ← Todos los eventos
+        </Link>
+        <br />
         <span className="eyebrow">31 de octubre · Parla</span>
         <h1 className="titulo-fiesta">
           Noche de
@@ -37,7 +42,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Dónde</div>
-              <div>C. Toledo, 36 · Local 5 · 28981 Parla (Madrid)</div>
+              <div>Parla (Madrid) · La dirección exacta te llega con la entrada.</div>
             </div>
           </li>
           <li>
@@ -102,7 +107,7 @@ export default function Landing() {
       </section>
 
       <div className="centrado" style={{ marginTop: 36 }}>
-        <Link to="/registro" className="boton">
+        <Link to="/halloween/registro" className="boton">
           Apuntarme a la fiesta
         </Link>
         <p className="subtitulo" style={{ fontSize: '0.85rem', marginTop: 16 }}>
@@ -111,6 +116,7 @@ export default function Landing() {
           Solo para mayores de 18.
         </p>
       </div>
+    </div>
     </div>
   );
 }

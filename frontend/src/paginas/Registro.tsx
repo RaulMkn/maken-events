@@ -13,6 +13,7 @@ export default function Registro() {
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [email, setEmail] = useState('');
+  const [deParteDe, setDeParteDe] = useState('');
   const [disfrazado, setDisfrazado] = useState(false);
   const [disfraz, setDisfraz] = useState('');
 
@@ -36,6 +37,11 @@ export default function Registro() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (deParteDe.trim().length === 0) {
+      setError('Indica de parte de quién vienes.');
+      return;
+    }
 
     if (disfrazado && disfraz.trim().length === 0) {
       setError('Indica de qué vas a ir disfrazado/a.');
@@ -103,6 +109,7 @@ export default function Registro() {
         email: email.trim(),
         disfrazado,
         disfraz: disfrazado ? disfraz.trim() : undefined,
+        deParteDe: deParteDe.trim(),
         aceptaCondiciones: true,
       });
       setExito(res.mensaje);
@@ -119,6 +126,7 @@ export default function Registro() {
 
   if (exito) {
     return (
+      <div className="tema-halloween">
       <div className="contenedor">
         <div className="tarjeta centrado aparece">
           <span role="img" aria-label="fantasma" style={{ fontSize: '3.5rem', display: 'block' }}>
@@ -135,14 +143,16 @@ export default function Registro() {
           </Link>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
+    <div className="tema-halloween">
     <div className="contenedor">
       <header style={{ marginBottom: 28 }} className="aparece">
-        <Link to="/" className="subtitulo" style={{ fontSize: '0.95rem' }}>
-          ← Volver
+        <Link to="/halloween" className="subtitulo" style={{ fontSize: '0.95rem' }}>
+          ← Volver al evento
         </Link>
         <span className="eyebrow" style={{ display: 'block', marginTop: 18 }}>
           Reserva tu sitio
@@ -201,6 +211,22 @@ export default function Registro() {
           />
         </div>
 
+        <div className="campo">
+          <label htmlFor="deParteDe">¿De parte de quién vienes?</label>
+          <input
+            id="deParteDe"
+            type="text"
+            value={deParteDe}
+            onChange={(e) => setDeParteDe(e.target.value)}
+            required
+            maxLength={120}
+            placeholder="Nombre de quien te invita"
+          />
+          <p className="subtitulo" style={{ fontSize: '0.8rem', marginTop: 6 }}>
+            La fiesta es privada. Pon el nombre de la persona del grupo que te invita.
+          </p>
+        </div>
+
         <div className="campo check">
           <input
             id="disfrazado"
@@ -252,6 +278,7 @@ export default function Registro() {
           {enviando ? 'Enviando…' : 'Enviar registro'}
         </button>
       </form>
+    </div>
     </div>
   );
 }
