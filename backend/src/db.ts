@@ -42,6 +42,20 @@ export async function initDb(): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_asistentes_email ON asistentes (email);
     CREATE INDEX IF NOT EXISTS idx_asistentes_token ON asistentes (token_qr);
+
+    -- Ajustes clave/valor (p. ej. precio_entrada_centimos).
+    CREATE TABLE IF NOT EXISTS ajustes (
+      clave TEXT PRIMARY KEY,
+      valor TEXT NOT NULL
+    );
+
+    -- Gastos del evento (dashboard financiero). Importe en céntimos.
+    CREATE TABLE IF NOT EXISTS gastos (
+      id               TEXT PRIMARY KEY,
+      concepto         TEXT NOT NULL,
+      importe_centimos INTEGER NOT NULL,
+      creado_en        TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
   `);
 
   // Migraciones idempotentes para bases de datos ya existentes (Heroku).
@@ -51,12 +65,54 @@ export async function initDb(): Promise<void> {
     `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS ha_entrado BOOLEAN NOT NULL DEFAULT false;`,
   );
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS entrado_en TIMESTAMPTZ;`);
+  // Precio realmente pagado por el asistente (en céntimos), fijado al confirmar.
+  await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS precio_pagado_centimos INTEGER;`);
+  // apellidos deja de ser obligatorio: quitamos el NOT NULL si existiera.
+  await pool.query(`ALTER TABLE asistentes ALTER COLUMN apellidos DROP NOT NULL;`).catch(() => {});
+
+  // Precio de entrada por defecto (7,00 €) si no hay ninguno fijado aún.
+  await pool.query(
+    `INSERT INTO ajustes (clave, valor) VALUES ('precio_entrada_centimos', '700')
+     ON CONFLICT (clave) DO NOTHING;`,
+  );
+}
+
+/** Lee un ajuste. Devuelve null si no existe. */
+export async function leerAjuste(clave: string): Promise<string | null> {
+  const { rows } = await pool.query<{ valor: string }>(
+    'SELECT valor FROM ajustes WHERE clave = $1',
+    [clave],
+  );
+  return rows[0]?.valor ?? null;
+}
+
+/** Escribe (o actualiza) un ajuste. */
+export async function guardarAjuste(clave: string, valor: string): Promise<void> {
+  await pool.query(
+    `INSERT INTO ajustes (clave, valor) VALUES ($1, $2)
+     ON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor`,
+    [clave, valor],
+  );
+}
+
+/** Precio de entrada actual en céntimos (por defecto 700 = 7 €). */
+export async function precioEntradaCentimos(): Promise<number> {
+  const v = await leerAjuste('precio_entrada_centimos');
+  const n = v ? parseInt(v, 10) : 700;
+  return Number.isFinite(n) && n >= 0 ? n : 700;
+}
+
+export interface GastoRow {
+  id: string;
+  concepto: string;
+  importe_centimos: number;
+  creado_en: string;
 }
 
 export interface AsistenteRow {
   id: string;
   nombre: string;
-  apellidos: string;
+  apellidos: string | null;
   email: string;
   disfrazado: boolean;
   disfraz: string | null;
@@ -69,4 +125,5 @@ export interface AsistenteRow {
   de_parte_de: string | null;
   ha_entrado: boolean;
   entrado_en: string | null;
+  precio_pagado_centimos: number | null;
 }

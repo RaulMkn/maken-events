@@ -29,12 +29,26 @@ export interface ResumenAsistentes {
 
 export interface DatosRegistro {
   nombre: string;
-  apellidos: string;
+  apellidos?: string;
   email: string;
   disfrazado: boolean;
   disfraz?: string;
   deParteDe: string;
   aceptaCondiciones: boolean;
+}
+
+export interface Gasto {
+  id: string;
+  concepto: string;
+  importeCentimos: number;
+  creadoEn: string;
+}
+
+export interface Finanzas {
+  ingresosCentimos: number;
+  gastosCentimos: number;
+  beneficioCentimos: number;
+  precioEntradaCentimos: number;
 }
 
 export interface ResultadoVerificacion {
@@ -116,6 +130,38 @@ export function confirmarPago(
 
 export function reenviarEmail(id: string): Promise<{ ok: true; emailEnviado: boolean }> {
   return request(`/api/admin/asistentes/${id}/reenviar-email`, { method: 'POST' });
+}
+
+// ---- Admin: dashboard financiero ----
+export function obtenerFinanzas(): Promise<Finanzas> {
+  return request('/api/admin/finanzas');
+}
+
+export function fijarPrecio(
+  precioEntradaCentimos: number,
+): Promise<{ ok: true; precioEntradaCentimos: number }> {
+  return request('/api/admin/ajustes', {
+    method: 'PUT',
+    body: JSON.stringify({ precioEntradaCentimos }),
+  });
+}
+
+export function listarGastos(): Promise<{ gastos: Gasto[] }> {
+  return request('/api/admin/gastos');
+}
+
+export function crearGasto(
+  concepto: string,
+  importeCentimos: number,
+): Promise<{ ok: true; id: string }> {
+  return request('/api/admin/gastos', {
+    method: 'POST',
+    body: JSON.stringify({ concepto, importeCentimos }),
+  });
+}
+
+export function borrarGasto(id: string): Promise<{ ok: true }> {
+  return request(`/api/admin/gastos/${id}`, { method: 'DELETE' });
 }
 
 // ---- Staff (puerta) ----

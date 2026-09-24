@@ -667,3 +667,127 @@ tr:last-child td {
   font-size: 0.85rem;
   color: var(--texto-tenue);
 }
+
+/* ---- Selector de fiesta y pestañas del panel admin ---- */
+.admin-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.select-fiesta {
+  padding: 10px 14px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde-claro);
+  background: rgba(10, 7, 16, 0.6);
+  color: var(--texto);
+  font-size: 0.95rem;
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(10, 7, 16, 0.5);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+}
+
+.tab {
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  color: var(--texto-tenue);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--fuente-texto);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab--activa {
+  background: linear-gradient(135deg, var(--calabaza), var(--naranja));
+  color: #1a0e00;
+}
+
+/* ---- Dashboard financiero ---- */
+.finanzas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.finanza-card {
+  background: linear-gradient(160deg, var(--panel), var(--negro-suave));
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 22px;
+  text-align: center;
+}
+
+.finanza-valor {
+  font-family: var(--fuente-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.finanza-valor--positivo {
+  color: var(--verde);
+}
+
+.finanza-valor--negativo {
+  color: var(--rojo);
+}
+
+.finanza-etiqueta {
+  color: var(--texto-tenue);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.gasto-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.gasto-fila:last-child {
+  border-bottom: none;
+}
+
+.gasto-importe {
+  font-weight: 700;
+  color: var(--naranja-claro);
+  white-space: nowrap;
+}
+
+.form-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-top: 16px;
+}
+
+.form-inline .campo {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 140px;
+}
+
+.precio-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}

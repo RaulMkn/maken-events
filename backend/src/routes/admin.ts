@@ -1,9 +1,16 @@
 import type { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
-import { pool, type AsistenteRow } from '../db.js';
+import {
+  pool,
+  guardarAjuste,
+  precioEntradaCentimos,
+  type AsistenteRow,
+  type GastoRow,
+} from '../db.js';
 import { protegerAdmin } from '../lib/proteger-admin.js';
 import { firmarTokenEntrada } from '../lib/qr-token.js';
 import { enviarEmailEntrada } from '../lib/email.js';
+import { limpiarTexto } from '../lib/validacion.js';
 
 /**
  * Endpoints del panel admin. Todos protegidos con sesión admin válida.
@@ -25,13 +32,14 @@ interface AsistenteDTO {
   haEntrado: boolean;
   creadoEn: string;
   pagadoEn: string | null;
+  precioPagadoCentimos: number | null;
 }
 
 function aDTO(row: AsistenteRow): AsistenteDTO {
   return {
     id: row.id,
     nombre: row.nombre,
-    apellidos: row.apellidos,
+    apellidos: row.apellidos ?? '',
     email: row.email,
     disfrazado: row.disfrazado,
     disfraz: row.disfraz,
@@ -41,6 +49,7 @@ function aDTO(row: AsistenteRow): AsistenteDTO {
     haEntrado: row.ha_entrado,
     creadoEn: row.creado_en,
     pagadoEn: row.pagado_en,
+    precioPagadoCentimos: row.precio_pagado_centimos,
   };
 }
 
@@ -101,12 +110,15 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       const jti = nanoid();
       const tokenQr = firmarTokenEntrada(row.id, jti);
       const pagadoEn = new Date().toISOString();
+      // Guardamos el precio vigente en este momento: cada asistente "vale" lo
+      // que pagó, aunque el precio del evento cambie después.
+      const precio = await precioEntradaCentimos();
 
       await pool.query(
         `UPDATE asistentes
-         SET estado_pago = 'pagado', token_qr = $1, pagado_en = $2
-         WHERE id = $3`,
-        [tokenQr, pagadoEn, row.id],
+         SET estado_pago = 'pagado', token_qr = $1, pagado_en = $2, precio_pagado_centimos = $3
+         WHERE id = $4`,
+        [tokenQr, pagadoEn, precio, row.id],
       );
 
       // Enviamos el email con el QR. Si falla el envío, el pago queda confirmado
@@ -114,7 +126,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       try {
         await enviarEmailEntrada({
           nombre: row.nombre,
-          apellidos: row.apellidos,
+          apellidos: row.apellidos ?? '',
           email: row.email,
           tokenQr,
         });
@@ -165,7 +177,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       try {
         await enviarEmailEntrada({
           nombre: row.nombre,
-          apellidos: row.apellidos,
+          apellidos: row.apellidos ?? '',
           email: row.email,
           tokenQr: row.token_qr,
         });
@@ -179,4 +191,116 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       }
     },
   );
+
+  // ---- Ajustes: precio de entrada ----
+  app.get('/ajustes', async () => {
+    const precioCentimos = await precioEntradaCentimos();
+    return { precioEntradaCentimos: precioCentimos };
+  });
+
+  app.put<{ Body: { precioEntradaCentimos: number } }>(
+    '/ajustes',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['precioEntradaCentimos'],
+          additionalProperties: false,
+          properties: {
+            // Precio en céntimos: entero >= 0, tope razonable (1.000 €).
+            precioEntradaCentimos: { type: 'integer', minimum: 0, maximum: 100000 },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      await guardarAjuste('precio_entrada_centimos', String(request.body.precioEntradaCentimos));
+      return reply.send({ ok: true, precioEntradaCentimos: request.body.precioEntradaCentimos });
+    },
+  );
+
+  // ---- Gastos ----
+  app.get('/gastos', async () => {
+    const { rows } = await pool.query<GastoRow>(
+      'SELECT * FROM gastos ORDER BY creado_en DESC',
+    );
+    return {
+      gastos: rows.map((g) => ({
+        id: g.id,
+        concepto: g.concepto,
+        importeCentimos: g.importe_centimos,
+        creadoEn: g.creado_en,
+      })),
+    };
+  });
+
+  app.post<{ Body: { concepto: string; importeCentimos: number } }>(
+    '/gastos',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['concepto', 'importeCentimos'],
+          additionalProperties: false,
+          properties: {
+            concepto: { type: 'string', minLength: 1, maxLength: 120 },
+            importeCentimos: { type: 'integer', minimum: 0, maximum: 100000000 },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const concepto = limpiarTexto(request.body.concepto);
+      if (concepto.length === 0) {
+        return reply.status(400).send({ error: 'El concepto no puede estar vacío.' });
+      }
+      const id = nanoid();
+      await pool.query(
+        'INSERT INTO gastos (id, concepto, importe_centimos) VALUES ($1, $2, $3)',
+        [id, concepto, request.body.importeCentimos],
+      );
+      return reply.status(201).send({ ok: true, id });
+    },
+  );
+
+  app.delete<{ Params: { id: string } }>(
+    '/gastos/:id',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: { id: { type: 'string', minLength: 1, maxLength: 40 } },
+        },
+      },
+    },
+    async (request, reply) => {
+      await pool.query('DELETE FROM gastos WHERE id = $1', [request.params.id]);
+      return reply.send({ ok: true });
+    },
+  );
+
+  // ---- Resumen financiero ----
+  app.get('/finanzas', async () => {
+    // Ingresos: suma de lo realmente pagado por los asistentes confirmados.
+    // Si algún confirmado antiguo no tuviera precio guardado, cuenta como 0.
+    const ingresosQ = await pool.query<{ total: string | null }>(
+      `SELECT COALESCE(SUM(precio_pagado_centimos), 0) AS total
+       FROM asistentes WHERE estado_pago = 'pagado'`,
+    );
+    const gastosQ = await pool.query<{ total: string | null }>(
+      'SELECT COALESCE(SUM(importe_centimos), 0) AS total FROM gastos',
+    );
+
+    const ingresosCentimos = Number(ingresosQ.rows[0]?.total ?? 0);
+    const gastosCentimos = Number(gastosQ.rows[0]?.total ?? 0);
+    const precioActual = await precioEntradaCentimos();
+
+    return {
+      ingresosCentimos,
+      gastosCentimos,
+      beneficioCentimos: ingresosCentimos - gastosCentimos,
+      precioEntradaCentimos: precioActual,
+    };
+  });
 }

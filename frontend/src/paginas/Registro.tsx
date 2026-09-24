@@ -186,13 +186,14 @@ export default function Registro() {
         </div>
 
         <div className="campo">
-          <label htmlFor="apellidos">Apellidos</label>
+          <label htmlFor="apellidos">
+            Apellidos <span style={{ color: 'var(--texto-tenue)', fontWeight: 400 }}>(opcional)</span>
+          </label>
           <input
             id="apellidos"
             type="text"
             value={apellidos}
             onChange={(e) => setApellidos(e.target.value)}
-            required
             maxLength={120}
             autoComplete="family-name"
           />

@@ -10,7 +10,7 @@ import { limpiarTexto, normalizarEmail, emailValido } from '../lib/validacion.js
 
 interface RegistroBody {
   nombre: string;
-  apellidos: string;
+  apellidos?: string;
   email: string;
   disfrazado: boolean;
   disfraz?: string;
@@ -21,11 +21,12 @@ interface RegistroBody {
 const registroSchema = {
   body: {
     type: 'object',
-    required: ['nombre', 'apellidos', 'email', 'disfrazado', 'deParteDe', 'aceptaCondiciones'],
+    // apellidos ya no es obligatorio; el resto sí.
+    required: ['nombre', 'email', 'disfrazado', 'deParteDe', 'aceptaCondiciones'],
     additionalProperties: false,
     properties: {
       nombre: { type: 'string', minLength: 1, maxLength: 80 },
-      apellidos: { type: 'string', minLength: 1, maxLength: 120 },
+      apellidos: { type: 'string', maxLength: 120 },
       email: { type: 'string', minLength: 3, maxLength: 254 },
       disfrazado: { type: 'boolean' },
       disfraz: { type: 'string', maxLength: 200 },
@@ -49,7 +50,7 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
     },
     async (request, reply) => {
       const nombre = limpiarTexto(request.body.nombre);
-      const apellidos = limpiarTexto(request.body.apellidos);
+      const apellidos = limpiarTexto(request.body.apellidos ?? '');
       const email = normalizarEmail(request.body.email);
       const disfrazado = request.body.disfrazado;
       const disfraz = disfrazado ? limpiarTexto(request.body.disfraz ?? '') : null;

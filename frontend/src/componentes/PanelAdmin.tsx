@@ -8,11 +8,15 @@ import {
   type Asistente,
   type ResumenAsistentes,
 } from '../api.ts';
+import DashboardFinanzas from './DashboardFinanzas.tsx';
+
+type Pestana = 'asistentes' | 'finanzas';
 
 /**
- * Panel admin: resumen + tabla de asistentes con acciones de pago/email.
+ * Panel admin: selector de fiesta + pestañas (asistentes / finanzas).
  */
 export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
+  const [pestana, setPestana] = useState<Pestana>('asistentes');
   const [asistentes, setAsistentes] = useState<Asistente[]>([]);
   const [resumen, setResumen] = useState<ResumenAsistentes | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -89,18 +93,52 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
       <div className="cabecera">
         <div>
           <span className="eyebrow">Panel de control</span>
-          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}>Asistentes</h1>
+          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}>Administración</h1>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <button className="boton boton-secundario boton-pequeno" onClick={cerrarSesion}>
+          Cerrar sesión
+        </button>
+      </div>
+
+      {/* Selector de fiesta (solo Halloween activo por ahora) + pestañas */}
+      <div className="admin-controles">
+        <select className="select-fiesta" defaultValue="halloween" aria-label="Fiesta">
+          <option value="halloween">🎃 Fiesta de Halloween</option>
+          <option value="carnaval" disabled>
+            🎭 Carnaval (próximamente)
+          </option>
+        </select>
+
+        <div className="tabs" role="tablist">
+          <button
+            className={`tab ${pestana === 'asistentes' ? 'tab--activa' : ''}`}
+            onClick={() => setPestana('asistentes')}
+            role="tab"
+            aria-selected={pestana === 'asistentes'}
+          >
+            Asistentes
+          </button>
+          <button
+            className={`tab ${pestana === 'finanzas' ? 'tab--activa' : ''}`}
+            onClick={() => setPestana('finanzas')}
+            role="tab"
+            aria-selected={pestana === 'finanzas'}
+          >
+            Finanzas
+          </button>
+        </div>
+
+        {pestana === 'asistentes' && (
           <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
             Actualizar
           </button>
-          <button className="boton boton-secundario boton-pequeno" onClick={cerrarSesion}>
-            Cerrar sesión
-          </button>
-        </div>
+        )}
       </div>
 
+      {pestana === 'finanzas' ? (
+        <DashboardFinanzas onNoAuth={onLogout} />
+      ) : (
+        <>
       {resumen && (
         <div className="metricas">
           <div className="metrica">
@@ -196,6 +234,8 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
             </div>
           </div>
         ))
+      )}
+        </>
       )}
     </div>
   );
