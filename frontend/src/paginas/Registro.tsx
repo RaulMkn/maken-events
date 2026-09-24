@@ -26,9 +26,9 @@ export default function Registro() {
       html: condicionesHtml(),
       icon: 'info',
       confirmButtonText: 'Entendido',
-      confirmButtonColor: '#ff6b00',
-      background: '#1a1226',
-      color: '#f3eef9',
+      confirmButtonColor: '#ff7a18',
+      background: '#1b1330',
+      color: '#f4eefb',
       width: 640,
     });
   }
@@ -51,10 +51,10 @@ export default function Registro() {
       showCancelButton: true,
       confirmButtonText: 'Acepto las condiciones',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#ff6b00',
-      cancelButtonColor: '#3d0066',
-      background: '#1a1226',
-      color: '#f3eef9',
+      confirmButtonColor: '#ff7a18',
+      cancelButtonColor: '#2a1245',
+      background: '#1b1330',
+      color: '#f4eefb',
       width: 640,
       focusCancel: true,
       didOpen: () => {
@@ -70,7 +70,7 @@ export default function Registro() {
           confirmBtn.removeAttribute('disabled');
           if (hint) {
             hint.textContent = '¡Gracias por leerlas! Ya puedes aceptar.';
-            hint.style.color = '#35c759';
+            hint.style.color = '#4ade80';
           }
         };
 
@@ -120,12 +120,16 @@ export default function Registro() {
   if (exito) {
     return (
       <div className="contenedor">
-        <div className="tarjeta centrado">
-          <span className="emoji-grande" role="img" aria-label="fantasma">
+        <div className="tarjeta centrado aparece">
+          <span role="img" aria-label="fantasma" style={{ fontSize: '3.5rem', display: 'block' }}>
             👻
           </span>
-          <h1 className="titulo-fiesta">¡Registro recibido!</h1>
-          <p className="aviso aviso-ok mt">{exito}</p>
+          <h1 className="titulo-fiesta" style={{ marginTop: 8, fontSize: 'clamp(1.8rem, 5vw, 2.6rem)' }}>
+            ¡Ya estás dentro!
+          </h1>
+          <p className="aviso aviso-ok mt" style={{ textAlign: 'left' }}>
+            {exito}
+          </p>
           <Link to="/" className="boton boton-secundario mt">
             Volver al inicio
           </Link>
@@ -136,17 +140,22 @@ export default function Registro() {
 
   return (
     <div className="contenedor">
-      <header style={{ marginBottom: 24 }}>
-        <Link to="/" className="subtitulo">
+      <header style={{ marginBottom: 28 }} className="aparece">
+        <Link to="/" className="subtitulo" style={{ fontSize: '0.95rem' }}>
           ← Volver
         </Link>
-        <h1 className="titulo-fiesta" style={{ marginTop: 12 }}>
+        <span className="eyebrow" style={{ display: 'block', marginTop: 18 }}>
+          Reserva tu sitio
+        </span>
+        <h1 className="titulo-fiesta" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)' }}>
           Registro
         </h1>
-        <p className="subtitulo">Rellena tus datos para apuntarte a la fiesta.</p>
+        <p className="subtitulo" style={{ marginTop: 10 }}>
+          Rellena tus datos y guarda tu entrada para la noche.
+        </p>
       </header>
 
-      <form className="tarjeta" onSubmit={onSubmit} noValidate>
+      <form className="tarjeta aparece" onSubmit={onSubmit} noValidate style={{ animationDelay: '0.08s' }}>
         {error && (
           <div className="aviso aviso-error" role="alert">
             {error}

@@ -87,7 +87,10 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
   return (
     <div className="contenedor-ancho">
       <div className="cabecera">
-        <h1>Asistentes 🎃</h1>
+        <div>
+          <span className="eyebrow">Panel de control</span>
+          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}>Asistentes</h1>
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
             Actualizar

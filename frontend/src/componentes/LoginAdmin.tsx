@@ -30,15 +30,20 @@ export default function LoginAdmin({ onLogin }: { onLogin: () => void }) {
 
   return (
     <div className="contenedor" style={{ maxWidth: 420 }}>
-      <header className="centrado" style={{ margin: '32px 0 24px' }}>
-        <span className="emoji-grande" role="img" aria-label="candado">
-          🔐
+      <header className="centrado aparece" style={{ margin: '48px 0 28px' }}>
+        <span role="img" aria-label="candado" style={{ fontSize: '3rem', display: 'block' }}>
+          🔒
         </span>
-        <h1>Panel de administración</h1>
-        <p className="subtitulo">Acceso restringido</p>
+        <span className="eyebrow" style={{ display: 'block', marginTop: 14 }}>
+          Zona privada
+        </span>
+        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)' }}>Panel de control</h1>
+        <p className="subtitulo" style={{ marginTop: 8 }}>
+          Necesitas tu contraseña y el código de tu app.
+        </p>
       </header>
 
-      <form className="tarjeta" onSubmit={onSubmit} noValidate>
+      <form className="tarjeta aparece" onSubmit={onSubmit} noValidate style={{ animationDelay: '0.08s' }}>
         {error && (
           <div className="aviso aviso-error" role="alert">
             {error}
