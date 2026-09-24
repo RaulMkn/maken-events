@@ -17,11 +17,15 @@ backend/public/
 *.env
 !.env.example
 
-# Base de datos SQLite
-*.sqlite
-*.sqlite3
-*.db
+# Datos locales
 data/
+
+# Vista previa del email (se regenera con scripts/preview-email.mjs)
+preview-email.html
+**/preview-email.html
+
+# Ficheros temporales de pruebas
+tmp-*
 
 # Logs
 *.log

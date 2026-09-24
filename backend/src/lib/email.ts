@@ -107,7 +107,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0710; border:1px solid #33254d; border-radius:12px;">
                   <tr>
                     <td style="padding:16px 18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.7;">
-                      <strong style="color:#ffa04d;">📅 Cuándo:</strong> Viernes 31 de octubre, de 22:00 a 04:00<br>
+                      <strong style="color:#ffa04d;">📅 Cuándo:</strong> Viernes 31 de octubre, de 23:00 a 04:00<br>
                       <strong style="color:#ffa04d;">📍 Dónde:</strong> C. Toledo, 36 · Local 5 · 28981 Parla (Madrid)
                     </td>
                   </tr>
@@ -119,8 +119,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
               <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
                 Guarda este correo. Tu entrada es personal e intransferible.<br>
                 <strong style="color:#ffa04d;">El QR solo sirve una vez:</strong> al escanearlo en la puerta queda usado.<br>
-                Si tienes cualquier problema con tu entrada, habla con maken.<br>
-                Nos vemos en la noche más terrorífica del año. 🎃
+                Si tienes cualquier problema con tu entrada, habla con la organizacion.<br>
               </td>
             </tr>
           </table>
