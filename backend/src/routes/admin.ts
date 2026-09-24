@@ -134,7 +134,12 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
         request.log.info({ asistenteId: row.id }, 'Pago confirmado y email enviado');
         return reply.send({ ok: true, emailEnviado: true });
       } catch (err) {
-        request.log.error({ err, asistenteId: row.id }, 'Pago confirmado pero falló el email');
+        // Registramos solo el mensaje del error, no el objeto completo, que
+        // en errores de SMTP puede contener la dirección del destinatario.
+        request.log.error(
+          { motivo: err instanceof Error ? err.message : 'desconocido', asistenteId: row.id },
+          'Pago confirmado pero falló el email',
+        );
         return reply.send({
           ok: true,
           emailEnviado: false,
@@ -184,11 +189,36 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
         await pool.query('UPDATE asistentes SET email_enviado = true WHERE id = $1', [row.id]);
         return reply.send({ ok: true, emailEnviado: true });
       } catch (err) {
-        request.log.error({ err, asistenteId: row.id }, 'Falló el reenvío del email');
+        request.log.error(
+          { motivo: err instanceof Error ? err.message : 'desconocido', asistenteId: row.id },
+          'Falló el reenvío del email',
+        );
         return reply
           .status(502)
           .send({ error: 'No se pudo enviar el email. Revisa la configuración del correo (SMTP).' });
       }
+    },
+  );
+
+  // ---- Eliminar un asistente ----
+  app.delete<{ Params: { id: string } }>(
+    '/asistentes/:id',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: { id: { type: 'string', minLength: 1, maxLength: 40 } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const res = await pool.query('DELETE FROM asistentes WHERE id = $1', [request.params.id]);
+      if (res.rowCount === 0) {
+        return reply.status(404).send({ error: 'Asistente no encontrado.' });
+      }
+      request.log.info({ asistenteId: request.params.id }, 'Asistente eliminado');
+      return reply.send({ ok: true });
     },
   );
 

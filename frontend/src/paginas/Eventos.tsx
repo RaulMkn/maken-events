@@ -21,7 +21,7 @@ export default function Eventos() {
           <span className="evento-emoji" role="img" aria-label="calabaza">
             🎃
           </span>
-          <div className="evento-titulo">Noche de Halloween</div>
+          <div className="evento-titulo">Halloween 4.0</div>
           <div className="evento-meta">31 de octubre · Parla · Registro abierto</div>
         </Link>
 
@@ -35,7 +35,7 @@ export default function Eventos() {
           <span className="evento-emoji" role="img" aria-label="máscara">
             🎭
           </span>
-          <div className="evento-titulo">Carnaval</div>
+          <div className="evento-titulo">Carnaval 2.0</div>
           <div className="evento-meta">Coming soon…</div>
         </div>
       </div>

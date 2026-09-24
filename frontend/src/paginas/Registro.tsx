@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { registrar, ApiError } from '../api.ts';
@@ -20,6 +20,14 @@ export default function Registro() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
+  // Aviso (no bloqueo) de que ya se hizo un registro desde este navegador.
+  const [yaRegistradoAqui, setYaRegistradoAqui] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem('registro_hecho') === '1') {
+      setYaRegistradoAqui(true);
+    }
+  }, []);
 
   function verCondiciones() {
     Swal.fire({
@@ -112,6 +120,8 @@ export default function Registro() {
         deParteDe: deParteDe.trim(),
         aceptaCondiciones: true,
       });
+      // Marca local para avisar de futuros registros desde este navegador.
+      localStorage.setItem('registro_hecho', '1');
       setExito(res.mensaje);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -166,6 +176,13 @@ export default function Registro() {
       </header>
 
       <form className="tarjeta aparece" onSubmit={onSubmit} noValidate style={{ animationDelay: '0.08s' }}>
+        {yaRegistradoAqui && (
+          <div className="aviso aviso-warn">
+            Parece que ya te has registrado desde este dispositivo. Si eres otra persona (por
+            ejemplo, usáis el mismo móvil), puedes continuar con el registro sin problema.
+          </div>
+        )}
+
         {error && (
           <div className="aviso aviso-error" role="alert">
             {error}
@@ -224,7 +241,7 @@ export default function Registro() {
             placeholder="Nombre de quien te invita"
           />
           <p className="subtitulo" style={{ fontSize: '0.8rem', marginTop: 6 }}>
-            La fiesta es privada. Pon el nombre de la persona del grupo que te invita.
+            La fiesta es privada. Pon el nombre de la persona que te invita.
           </p>
         </div>
 
@@ -274,6 +291,23 @@ export default function Registro() {
           </button>
           .
         </p>
+
+        <div
+          className="aviso"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--borde)',
+            borderLeft: '3px solid var(--borde-claro)',
+            color: 'var(--texto-tenue)',
+            fontSize: '0.8rem',
+            marginTop: 4,
+          }}
+        >
+          <strong style={{ color: 'var(--texto)' }}>Protección de datos.</strong> Usamos tu nombre y
+          tu correo con el único fin de gestionar tu entrada y enviártela. No los compartimos con
+          terceros y los eliminaremos cuando termine la fiesta. Puedes pedir ver o borrar tus datos
+          escribiendo a maken.
+        </div>
 
         <button type="submit" className="boton boton-bloque mt" disabled={enviando}>
           {enviando ? 'Enviando…' : 'Enviar registro'}

@@ -3,6 +3,7 @@ import {
   listarAsistentes,
   confirmarPago,
   reenviarEmail,
+  eliminarAsistente,
   logout,
   ApiError,
   type Asistente,
@@ -78,6 +79,29 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
       await cargar();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo reenviar el email.');
+    } finally {
+      setAccionEnCurso(null);
+    }
+  }
+
+  async function onEliminar(a: Asistente) {
+    const nombre = `${a.nombre} ${a.apellidos}`.trim();
+    if (
+      !confirm(
+        `¿Eliminar a ${nombre} del listado? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+    setAccionEnCurso(a.id);
+    setAviso(null);
+    setError(null);
+    try {
+      await eliminarAsistente(a.id);
+      setAviso(`${nombre} eliminado del listado.`);
+      await cargar();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo eliminar.');
     } finally {
       setAccionEnCurso(null);
     }
@@ -209,23 +233,33 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
                       <td>{a.emailEnviado ? '✅' : '—'}</td>
                       <td>{a.haEntrado ? '🟢 Dentro' : '—'}</td>
                       <td>
-                        {a.estadoPago === 'pendiente' ? (
+                        <div className="acciones-fila">
+                          {a.estadoPago === 'pendiente' ? (
+                            <button
+                              className="boton boton-pequeno"
+                              onClick={() => onConfirmar(a)}
+                              disabled={accionEnCurso === a.id}
+                            >
+                              {accionEnCurso === a.id ? '…' : 'Confirmar pago'}
+                            </button>
+                          ) : (
+                            <button
+                              className="boton boton-secundario boton-pequeno"
+                              onClick={() => onReenviar(a)}
+                              disabled={accionEnCurso === a.id}
+                            >
+                              {accionEnCurso === a.id ? '…' : 'Reenviar entrada'}
+                            </button>
+                          )}
                           <button
-                            className="boton boton-pequeno"
-                            onClick={() => onConfirmar(a)}
+                            className="boton boton-peligro boton-pequeno"
+                            onClick={() => onEliminar(a)}
                             disabled={accionEnCurso === a.id}
+                            aria-label={`Eliminar a ${a.nombre} ${a.apellidos}`}
                           >
-                            {accionEnCurso === a.id ? '…' : 'Confirmar pago'}
+                            Eliminar
                           </button>
-                        ) : (
-                          <button
-                            className="boton boton-secundario boton-pequeno"
-                            onClick={() => onReenviar(a)}
-                            disabled={accionEnCurso === a.id}
-                          >
-                            {accionEnCurso === a.id ? '…' : 'Reenviar entrada'}
-                          </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))}

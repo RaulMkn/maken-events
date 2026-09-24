@@ -132,6 +132,10 @@ export function reenviarEmail(id: string): Promise<{ ok: true; emailEnviado: boo
   return request(`/api/admin/asistentes/${id}/reenviar-email`, { method: 'POST' });
 }
 
+export function eliminarAsistente(id: string): Promise<{ ok: true }> {
+  return request(`/api/admin/asistentes/${id}`, { method: 'DELETE' });
+}
+
 // ---- Admin: dashboard financiero ----
 export function obtenerFinanzas(): Promise<Finanzas> {
   return request('/api/admin/finanzas');

@@ -791,3 +791,24 @@ tr:last-child td {
   align-items: flex-end;
   flex-wrap: wrap;
 }
+
+/* Botón de acción peligrosa (eliminar) */
+.boton-peligro {
+  background: transparent;
+  color: var(--rojo);
+  border: 1px solid rgba(255, 84, 112, 0.4);
+  box-shadow: none;
+}
+
+.boton-peligro:hover:not(:disabled) {
+  background: rgba(255, 84, 112, 0.12);
+  border-color: var(--rojo);
+  filter: none;
+}
+
+/* Agrupa varios botones de acción en la celda de la tabla */
+.acciones-fila {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}

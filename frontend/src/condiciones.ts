@@ -4,10 +4,13 @@
  */
 export const CONDICIONES: string[] = [
   'La entrada está reservada a personas mayores de 18 años. Se podrá solicitar el DNI en la puerta y no se permitirá el acceso a menores de edad.',
-  'Se espera una conducta responsable y respetuosa con el resto de asistentes, y con el local.',
-  'La organización (maken) se reserva el derecho de expulsar (cruelmente) de la fiesta, sin derecho a devolución, a quien no cumpla estas normas.',
-  'Cada asistente es responsable de sus objetos personales y de su propio consumo (si te desaparece el alcohol es cosa tuya).',
-  'En caso de no poder ir a la fiesta y querer traspasar tu entrada hablar con la organización (maken)',
+  'Se espera una conducta responsable y respetuosa con el resto de asistentes, y con el local (pls).',
+  'Cada asistente es responsable de sus objetos personales y de su propio consumo (si te desaparece el alcohol no me hago responsable).',
+  'En caso de no poder ir a la fiesta y querer traspasar tu entrada hablar con la organización',
+  'En la medida de lo posible no hacer mucho ruido fuera al salir a fumar etc (no queremos que vengan los malos)',
+  'La lista sera contrastada previamente antes de enviar los qr (intenta no decir que vienes de parte de gente random)',
+  'La organización (maken) se reserva el derecho de expulsar (cruelmente) de la fiesta, sin derecho a devolución, a quien no cumpla estas normas (no ha pasado nunca sois la polla)',
+  'Protección de datos: al registrarte, tu nombre y correo se usan únicamente para gestionar y enviarte tu entrada. Los guarda la organización (maken), no se ceden a terceros y se eliminan cuando termine la fiesta. Puedes pedir ver o borrar tus datos escribiendo a maken.',
 ];
 
 /** Devuelve las condiciones como HTML (lista) para mostrarlas en un modal. */

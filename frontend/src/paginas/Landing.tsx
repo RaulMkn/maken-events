@@ -18,14 +18,10 @@ export default function Landing() {
           <br />
           Halloween
         </h1>
-        <p className="subtitulo" style={{ marginTop: 16, maxWidth: 520, marginInline: 'auto' }}>
-          Disfraces, sustos y buena gente. Una noche para dejarse el miedo en la puerta… o traerlo
-          puesto.
-        </p>
       </header>
 
       <section className="tarjeta aparece" style={{ animationDelay: '0.08s' }}>
-        <h2>Lo que necesitas saber</h2>
+        <h2>Info</h2>
         <ul className="info-lista">
           <li>
             <span className="icono" role="img" aria-label="calendario">
@@ -33,7 +29,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Cuándo</div>
-              <div>Viernes 31 de octubre · de 22:00 a 04:00</div>
+              <div>Viernes 31 de octubre · de 23:00 a 04:00</div>
             </div>
           </li>
           <li>
@@ -42,7 +38,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Dónde</div>
-              <div>Parla (Madrid) · La dirección exacta te llega con la entrada.</div>
+              <div>Parla (Madrid) · La dirección exacta llega con la entrada.</div>
             </div>
           </li>
           <li>
@@ -51,7 +47,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Entrada</div>
-              <div>7 € por persona</div>
+              <div>8 € por persona (provisional)</div>
             </div>
           </li>
           <li>
@@ -60,7 +56,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Bebida</div>
-              <div>Trae tu propio alcohol. El hielo y los vasos los ponemos nosotros.</div>
+              <div>Trae tu propio alcohol. En el local habrá hielo y vasos</div>
             </div>
           </li>
         </ul>
@@ -71,8 +67,7 @@ export default function Landing() {
           Concurso de disfraces <span className="acento-creepy" style={{ color: 'var(--lima)' }}>¡vístete!</span>
         </h2>
         <p className="subtitulo" style={{ fontSize: '1rem' }}>
-          Un jurado elige a los tres mejores disfraces de la noche. Los ganadores desfilan por la
-          alfombra roja y eligen premio por orden:
+          Un jurado elige a los tres mejores disfraces de la noche
         </p>
         <div className="premios">
           <div className="premio">
@@ -102,7 +97,7 @@ export default function Landing() {
         </div>
         <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 16 }}>
           {/* PLACEHOLDER: especificar cuáles son los 3 premios */}
-          Los premios se desvelan pronto. Ve pensando el disfraz.
+          Los premios se desvelan pronto pero obvio habra Jagger
         </p>
       </section>
 
@@ -111,7 +106,7 @@ export default function Landing() {
           Apuntarme a la fiesta
         </Link>
         <p className="subtitulo" style={{ fontSize: '0.85rem', marginTop: 16 }}>
-          Recibirás tu entrada con un QR por email cuando confirmemos el pago.
+          Recibirás la entrada con un QR por email cuando confirmemos el pago.
           <br />
           Solo para mayores de 18.
         </p>
