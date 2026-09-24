@@ -7,8 +7,8 @@
     "node": "22.x"
   },
   "scripts": {
-    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
-    "build:backend": "npm --prefix backend install && npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend install --include=dev && npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend install --include=dev && npm --prefix backend run build",
     "copy:frontend": "rm -rf backend/public && cp -r frontend/dist backend/public",
     "heroku-postbuild": "npm run build:frontend && npm run copy:frontend && npm run build:backend",
     "start": "node backend/dist/server.js"
