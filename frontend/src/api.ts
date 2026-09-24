@@ -71,13 +71,17 @@ class ApiError extends Error {
 }
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  // Solo declaramos Content-Type JSON si de verdad enviamos cuerpo. Si no,
+  // Fastify rechaza (400) una petición con content-type JSON y body vacío.
+  const headers: Record<string, string> = { ...(options.headers as Record<string, string>) };
+  if (options.body != null) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(url, {
     ...options,
     credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 
   const texto = await res.text();
