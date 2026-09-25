@@ -1,15 +1,13 @@
-import nodemailer, { type Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 import qrcode from 'qrcode';
 import { config } from '../config.js';
 
 /**
- * Envío del email de entrada con el QR embebido, vía SMTP (Gmail).
+ * Envío del email de entrada con el QR embebido, vía Resend.
  *
- * Para Gmail hace falta una "contraseña de aplicación" (App Password):
- * se genera en la cuenta de Google con la verificación en dos pasos activa,
- * y se pone en SMTP_PASS. La contraseña normal de la cuenta NO funciona.
- *
- * El QR se genera como PNG y se incrusta inline en el cuerpo vía cid.
+ * Usamos Resend con el dominio propio (maken-events.app) verificado, lo que
+ * da SPF/DKIM y evita que el correo caiga en spam. El QR se genera como PNG y
+ * se incrusta inline en el cuerpo (inlineContentId -> cid en el HTML).
  */
 
 interface DatosEntrada {
@@ -19,46 +17,33 @@ interface DatosEntrada {
   tokenQr: string;
 }
 
-let transporter: Transporter | null = null;
+let resend: Resend | null = null;
 
-function getTransporter(): Transporter {
-  if (!config.email.smtpUser || !config.email.smtpPass) {
-    throw new Error(
-      'El SMTP no está configurado (SMTP_USER / SMTP_PASS); no se puede enviar el email.',
-    );
+function getResend(): Resend {
+  if (!config.email.resendApiKey) {
+    throw new Error('RESEND_API_KEY no está configurada; no se puede enviar el email.');
   }
-  // Reutilizamos el transporter entre envíos.
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: config.email.smtpHost,
-      port: config.email.smtpPort,
-      secure: config.email.smtpSecure,
-      auth: {
-        user: config.email.smtpUser,
-        pass: config.email.smtpPass,
-      },
-    });
+  if (!resend) {
+    resend = new Resend(config.email.resendApiKey);
   }
-  return transporter;
+  return resend;
 }
 
 export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
-  const transport = getTransporter();
+  const cliente = getResend();
 
-  // Generamos el QR como PNG (buffer) a partir del token firmado.
+  // El QR contiene un código corto -> poco denso y fácil de leer. Nivel de
+  // corrección de errores alto (H) para que tolere reflejos de pantalla.
   const qrBuffer = await qrcode.toBuffer(datos.tokenQr, {
-    errorCorrectionLevel: 'M',
+    errorCorrectionLevel: 'H',
     margin: 2,
-    width: 320,
+    width: 360,
   });
 
   const nombreCompleto = `${datos.nombre} ${datos.apellidos}`.trim();
   const asunto = `🎟️ Tu entrada para ${config.partyName}`;
-  // Si no se define EMAIL_FROM, usamos la propia cuenta SMTP como remitente.
-  const remitente = `${config.partyName} <${config.email.from || config.email.smtpUser}>`;
+  const remitente = config.email.from || 'entradas@maken-events.app';
 
-  // Email en HTML basado en tablas + estilos inline: es la forma fiable de que
-  // se vea bien en Gmail, Outlook, Apple Mail, etc. (no soportan CSS moderno).
   const html = `
   <!doctype html>
   <html lang="es">
@@ -94,7 +79,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="background:#ffffff; border-radius:14px; padding:14px;">
-                      <img src="cid:entrada-qr" alt="Codigo QR de tu entrada" width="220" height="220" style="display:block; width:220px; height:220px;" />
+                      <img src="cid:entrada-qr" alt="Codigo QR de tu entrada" width="240" height="240" style="display:block; width:240px; height:240px;" />
                     </td>
                   </tr>
                 </table>
@@ -119,7 +104,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
               <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
                 Guarda este correo. Tu entrada es personal e intransferible.<br>
                 <strong style="color:#ffa04d;">El QR solo sirve una vez:</strong> al escanearlo en la puerta queda usado.<br>
-                Si tienes cualquier problema con tu entrada, habla con la organizacion.<br>
+                Si tienes cualquier problema con tu entrada, habla con la organización.
               </td>
             </tr>
           </table>
@@ -130,29 +115,32 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
   </html>
   `;
 
-  // Versión en texto plano por si el cliente no muestra HTML.
   const texto = `Entrada confirmada para ${config.partyName}.
 Hola ${nombreCompleto}, tu pago está confirmado.
-Cuándo: viernes 31 de octubre, de 22:00 a 04:00.
+Cuándo: viernes 31 de octubre, de 23:00 a 04:00.
 Dónde: C. Toledo, 36, Local 5, 28981 Parla (Madrid).
 Enseña el código QR adjunto en la puerta. Es personal e intransferible.
-El QR solo sirve una vez: al escanearlo queda usado. Ante cualquier problema, habla con maken.`;
+El QR solo sirve una vez: al escanearlo queda usado. Ante cualquier problema, habla con la organización.`;
 
-  await transport.sendMail({
-    from: remitente,
+  const resultado = await cliente.emails.send({
+    from: `${config.partyName} <${remitente}>`,
     to: datos.email,
     subject: asunto,
-    text: texto,
     html,
+    text: texto,
     attachments: [
       {
         filename: 'entrada-qr.png',
-        content: qrBuffer,
-        // En el HTML lo referenciamos con src="cid:entrada-qr".
-        cid: 'entrada-qr',
+        content: qrBuffer.toString('base64'),
+        // Referenciado en el HTML con src="cid:entrada-qr".
+        inlineContentId: 'entrada-qr',
       },
     ],
   });
+
+  if (resultado.error) {
+    throw new Error(`Resend devolvió un error: ${resultado.error.message}`);
+  }
 }
 
 /** Escapa caracteres HTML para evitar inyección en el cuerpo del email. */

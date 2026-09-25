@@ -46,9 +46,7 @@ export const config = {
   sessionSecret: isProd
     ? required('SESSION_SECRET')
     : optional('SESSION_SECRET', 'dev-session-secret-no-usar-en-prod'),
-  qrTokenSecret: isProd
-    ? required('QR_TOKEN_SECRET')
-    : optional('QR_TOKEN_SECRET', 'dev-qr-secret-no-usar-en-prod'),
+
 
   admin: {
     user: optional('ADMIN_USER', 'admin'),
@@ -65,17 +63,11 @@ export const config = {
   // Login simple, sin MFA: solo sirve para escanear QR en la puerta.
   staffPassword: optional('STAFF_PASSWORD'),
 
-  // Email por SMTP (Gmail). Para Gmail necesitas una "contraseña de
-  // aplicación" (App Password), no tu contraseña normal.
+  // Email vía Resend con dominio propio verificado (evita spam por SPF/DKIM).
   email: {
-    smtpHost: optional('SMTP_HOST', 'smtp.gmail.com'),
-    smtpPort: Number(process.env.SMTP_PORT ?? 465),
-    // true para puerto 465 (SSL), false para 587 (STARTTLS).
-    smtpSecure: (process.env.SMTP_SECURE ?? 'true') === 'true',
-    smtpUser: optional('SMTP_USER'),
-    smtpPass: optional('SMTP_PASS'),
-    // Remitente que verá el destinatario. Por defecto, la propia cuenta.
-    from: optional('EMAIL_FROM'),
+    resendApiKey: optional('RESEND_API_KEY'),
+    // Remitente. Debe ser una dirección del dominio verificado en Resend.
+    from: optional('EMAIL_FROM', 'entradas@maken-events.app'),
   },
 
   partyName: optional('PARTY_NAME', 'Fiesta de Halloween'),

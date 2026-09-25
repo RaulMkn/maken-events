@@ -1,7 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { config } from '../config.js';
 import { pool, type AsistenteRow } from '../db.js';
-import { verificarTokenEntrada } from '../lib/qr-token.js';
 import { COOKIE_STAFF, crearTokenStaff } from '../lib/sesion.js';
 import { protegerStaff } from '../lib/proteger-staff.js';
 
@@ -74,21 +73,16 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const payload = verificarTokenEntrada(request.body.token);
-      if (!payload) {
-        return reply.send({ resultado: 'invalida', motivo: 'QR no válido o manipulado.' });
-      }
-
-      const { rows } = await pool.query<AsistenteRow>('SELECT * FROM asistentes WHERE id = $1', [
-        payload.sub,
-      ]);
+      // El QR contiene un código corto que buscamos directamente en la BD.
+      const codigo = request.body.token.trim();
+      const { rows } = await pool.query<AsistenteRow>(
+        'SELECT * FROM asistentes WHERE token_qr = $1',
+        [codigo],
+      );
       const row = rows[0];
 
       if (!row) {
-        return reply.send({ resultado: 'invalida', motivo: 'La entrada no corresponde a nadie.' });
-      }
-      if (row.token_qr !== request.body.token) {
-        return reply.send({ resultado: 'invalida', motivo: 'Entrada caducada o reemitida.' });
+        return reply.send({ resultado: 'invalida', motivo: 'QR no válido o no reconocido.' });
       }
       if (row.estado_pago !== 'pagado') {
         return reply.send({ resultado: 'invalida', motivo: 'El pago no está confirmado.' });

@@ -8,7 +8,6 @@ import {
   type GastoRow,
 } from '../db.js';
 import { protegerAdmin } from '../lib/proteger-admin.js';
-import { firmarTokenEntrada } from '../lib/qr-token.js';
 import { enviarEmailEntrada } from '../lib/email.js';
 import { limpiarTexto } from '../lib/validacion.js';
 
@@ -106,9 +105,10 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Este asistente ya tiene el pago confirmado.' });
       }
 
-      // Generamos el token del QR (firmado) y lo persistimos.
-      const jti = nanoid();
-      const tokenQr = firmarTokenEntrada(row.id, jti);
+      // Código corto y aleatorio para el QR. Al ser corto, el QR es poco denso
+      // y se lee bien desde la pantalla de un móvil. La validez se comprueba
+      // buscando este código en la BD (no hace falta que sea un JWT).
+      const tokenQr = nanoid(16);
       const pagadoEn = new Date().toISOString();
       // Guardamos el precio vigente en este momento: cada asistente "vale" lo
       // que pagó, aunque el precio del evento cambie después.

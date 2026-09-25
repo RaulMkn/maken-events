@@ -29,7 +29,7 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
         preferredCamera: 'environment',
         highlightScanRegion: true,
         highlightCodeOutline: true,
-        maxScansPerSecond: 5,
+        maxScansPerSecond: 10,
       },
     );
     scannerRef.current = scanner;

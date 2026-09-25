@@ -1,16 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import { pool, type AsistenteRow } from '../db.js';
-import { verificarTokenEntrada } from '../lib/qr-token.js';
 import { protegerAdmin } from '../lib/proteger-admin.js';
 
 /**
- * Verificación de una entrada en la puerta a partir del token del QR.
- * Protegido con sesión admin (quien esté en la puerta usa el panel).
- *
- * Comprueba que:
- *  - el token está firmado correctamente,
- *  - el asistente existe y tiene el pago confirmado,
- *  - el token coincide con el guardado (no revocado / reemitido).
+ * Consulta de una entrada por su código de QR (solo lectura, no marca entrada).
+ * Protegido con sesión admin. La validación real de puerta (que marca la
+ * entrada como usada) está en /api/staff/verificar.
  */
 export async function entradaRoutes(app: FastifyInstance): Promise<void> {
   app.post<{ Body: { token: string } }>(
@@ -27,25 +22,18 @@ export async function entradaRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const payload = verificarTokenEntrada(request.body.token);
-      if (!payload) {
-        return reply.send({ valida: false, motivo: 'QR no válido o manipulado.' });
-      }
-
+      const codigo = request.body.token.trim();
       const { rows } = await pool.query<AsistenteRow>(
-        'SELECT * FROM asistentes WHERE id = $1',
-        [payload.sub],
+        'SELECT * FROM asistentes WHERE token_qr = $1',
+        [codigo],
       );
       const row = rows[0];
 
       if (!row) {
-        return reply.send({ valida: false, motivo: 'La entrada no corresponde a nadie.' });
+        return reply.send({ valida: false, motivo: 'QR no válido o no reconocido.' });
       }
       if (row.estado_pago !== 'pagado') {
         return reply.send({ valida: false, motivo: 'Pago no confirmado.' });
-      }
-      if (row.token_qr !== request.body.token) {
-        return reply.send({ valida: false, motivo: 'Entrada caducada o reemitida.' });
       }
 
       return reply.send({
@@ -55,6 +43,7 @@ export async function entradaRoutes(app: FastifyInstance): Promise<void> {
           apellidos: row.apellidos,
           disfrazado: row.disfrazado,
           disfraz: row.disfraz,
+          haEntrado: row.ha_entrado,
         },
       });
     },
