@@ -19,8 +19,9 @@ function optional(name: string, fallback = ''): string {
 
 /**
  * Decodifica el hash de la contraseña. Si viene con prefijo "b64:", lo
- * interpreta como base64 (así el .env no contiene los '$' del hash argon2
- * que docker-compose intentaría interpolar). Si no, se usa tal cual.
+ * interpreta como base64 (así el valor no contiene los '$' del hash argon2
+ * que algunos gestores de variables interpretarían como interpolación).
+ * Si no, se usa tal cual.
  */
 function decodificarHash(valor: string): string {
   if (valor.startsWith('b64:')) {
@@ -50,8 +51,8 @@ export const config = {
 
   admin: {
     user: optional('ADMIN_USER', 'admin'),
-    // El hash argon2 contiene '$', que docker-compose interpreta como
-    // interpolación de variables en el .env. Para evitarlo, aceptamos el
+    // El hash argon2 contiene '$', que algunos gestores de variables de
+    // entorno interpretan como interpolación. Para evitarlo, aceptamos el
     // hash codificado en base64 con prefijo "b64:" (formato que emite
     // gen-admin). También admitimos el hash en texto plano por comodidad
     // en desarrollo.

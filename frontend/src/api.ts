@@ -1,7 +1,7 @@
 /**
  * Cliente HTTP mínimo para hablar con el backend.
- * Todas las llamadas usan el mismo origen (Caddy hace de proxy de /api).
- * Incluimos credentials para que viaje la cookie de sesión admin.
+ * Todas las llamadas usan el mismo origen (el backend sirve la API y el
+ * frontend). Incluimos credentials para que viaje la cookie de sesión.
  */
 
 export interface Asistente {

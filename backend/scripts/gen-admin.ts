@@ -41,8 +41,9 @@ async function main(): Promise<void> {
 
   // Hash de la contraseña (parámetros por defecto de @node-rs/argon2 = argon2id).
   const passwordHashRaw = await hash(password);
-  // Lo codificamos en base64 con prefijo "b64:" para que el .env no contenga
-  // los '$' del hash, que docker-compose interpretaría como variables.
+  // Lo codificamos en base64 con prefijo "b64:" para que el valor no contenga
+  // los '$' del hash argon2, que algunos gestores de variables de entorno
+  // (.env, config vars) interpretarían como interpolación.
   const passwordHash = `b64:${Buffer.from(passwordHashRaw, 'utf8').toString('base64')}`;
 
   // Secreto TOTP.

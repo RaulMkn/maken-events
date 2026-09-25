@@ -32,10 +32,6 @@ tmp-*
 npm-debug.log*
 logs/
 
-# Caddy
-caddy_data/
-caddy_config/
-
 # Sistema
 .DS_Store
 Thumbs.db

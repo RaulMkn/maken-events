@@ -38,7 +38,6 @@ fest/
 ├── frontend/        React + Vite (páginas: Eventos, Landing, Registro, Admin, Staff)
 ├── package.json     orquesta el build para Heroku (heroku-postbuild)
 ├── Procfile         arranque en Heroku
-├── docker-compose.yml + Caddyfile   entorno local alternativo con Docker
 └── .env.example     plantilla de variables de entorno
 ```
 
