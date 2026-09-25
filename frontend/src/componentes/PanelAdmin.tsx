@@ -153,9 +153,18 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
         </div>
 
         {pestana === 'asistentes' && (
-          <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
-            Actualizar
-          </button>
+          <>
+            <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
+              Actualizar
+            </button>
+            <a
+              className="boton boton-secundario boton-pequeno"
+              href="/api/admin/asistentes.csv"
+              download
+            >
+              Exportar CSV
+            </a>
+          </>
         )}
       </div>
 

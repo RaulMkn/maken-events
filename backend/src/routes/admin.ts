@@ -74,6 +74,56 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     return { resumen, asistentes };
   });
 
+  // ---- Exportar asistentes a CSV (copia de seguridad / lista para la puerta) ----
+  app.get('/asistentes.csv', async (_request, reply) => {
+    const { rows } = await pool.query<AsistenteRow>(
+      'SELECT * FROM asistentes ORDER BY de_parte_de NULLS LAST, creado_en',
+    );
+
+    const cabecera = [
+      'Nombre',
+      'Apellidos',
+      'Email',
+      'De parte de',
+      'Disfrazado',
+      'Disfraz',
+      'Estado pago',
+      'Precio pagado (EUR)',
+      'Email enviado',
+      'Ha entrado',
+      'Creado en',
+      'Pagado en',
+    ];
+
+    const lineas = rows.map((r) =>
+      [
+        r.nombre,
+        r.apellidos ?? '',
+        r.email,
+        r.de_parte_de ?? '',
+        r.disfrazado ? 'Sí' : 'No',
+        r.disfraz ?? '',
+        r.estado_pago,
+        r.precio_pagado_centimos != null ? (r.precio_pagado_centimos / 100).toFixed(2) : '',
+        r.email_enviado ? 'Sí' : 'No',
+        r.ha_entrado ? 'Sí' : 'No',
+        r.creado_en ?? '',
+        r.pagado_en ?? '',
+      ]
+        .map(campoCsv)
+        .join(','),
+    );
+
+    // BOM inicial para que Excel abra bien los acentos.
+    const csv = '\uFEFF' + [cabecera.map(campoCsv).join(','), ...lineas].join('\r\n');
+
+    const fecha = new Date().toISOString().slice(0, 10);
+    return reply
+      .header('Content-Type', 'text/csv; charset=utf-8')
+      .header('Content-Disposition', `attachment; filename="asistentes-${fecha}.csv"`)
+      .send(csv);
+  });
+
   // ---- Confirmar pago: genera QR + envía email ----
   app.post<{ Params: { id: string } }>(
     '/asistentes/:id/confirmar-pago',
@@ -333,4 +383,15 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       precioEntradaCentimos: precioActual,
     };
   });
+}
+
+/**
+ * Escapa un valor para CSV: si contiene comas, comillas o saltos de línea,
+ * lo envuelve en comillas dobles y duplica las comillas internas.
+ */
+function campoCsv(valor: string): string {
+  if (/[",\r\n]/.test(valor)) {
+    return `"${valor.replace(/"/g, '""')}"`;
+  }
+  return valor;
 }

@@ -67,6 +67,12 @@ export async function initDb(): Promise<void> {
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS entrado_en TIMESTAMPTZ;`);
   // Precio realmente pagado por el asistente (en céntimos), fijado al confirmar.
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS precio_pagado_centimos INTEGER;`);
+  // Índice único parcial: garantiza que no haya dos entradas con el mismo
+  // código de QR (permite varios NULL, para los aún no confirmados).
+  await pool.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS uniq_asistentes_token_qr
+     ON asistentes (token_qr) WHERE token_qr IS NOT NULL;`,
+  );
   // apellidos deja de ser obligatorio: quitamos el NOT NULL si existiera.
   await pool.query(`ALTER TABLE asistentes ALTER COLUMN apellidos DROP NOT NULL;`).catch(() => {});
 

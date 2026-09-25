@@ -20,6 +20,9 @@ backend/public/
 # Datos locales
 data/
 
+# Backups / dumps de base de datos (contienen datos personales)
+*.dump
+
 # Vista previa del email (se regenera con scripts/preview-email.mjs)
 preview-email.html
 **/preview-email.html

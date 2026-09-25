@@ -76,7 +76,14 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
       setResultado(res);
       if (navigator.vibrate) navigator.vibrate(res.resultado === 'valida' ? 120 : 300);
     } catch {
-      setResultado({ resultado: 'invalida', motivo: 'Error de conexión al verificar.' });
+      // Fallo de red/servidor: no sabemos si la entrada vale. Pedimos reintentar
+      // y NO recordamos este código, para poder volver a escanearlo enseguida.
+      setResultado({
+        resultado: 'invalida',
+        motivo: 'Sin conexión con el servidor. Reintenta el escaneo.',
+      });
+      ultimoRef.current = '';
+      if (navigator.vibrate) navigator.vibrate(300);
     } finally {
       verificandoRef.current = false;
     }
