@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "maken-events — Arquitectura",
+    "output": "arquitectura-diagrama.html",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "registro", "label": "Registro público", "focus": ["asistente", "spa", "fastify", "rutas", "db"], "note": "Alta de asistente desde la web pública hasta PostgreSQL." },
+      { "id": "admin", "label": "Panel admin y pago", "focus": ["admin", "fastify", "rutas", "db", "resend"], "note": "Login con MFA, confirmación de pago, generación de QR y envío del email." },
+      { "id": "puerta", "label": "Puerta (staff)", "focus": ["staff", "spa", "fastify", "rutas", "db"], "note": "Escaneo del QR en la entrada y marca de un solo uso." }
+    ]
+  },
+  "components": [
+    { "id": "asistente", "type": "external", "label": "Asistente", "sublabel": "Navegador", "tag": "público", "pos": [40, 96], "size": [130, 62] },
+    { "id": "admin", "type": "external", "label": "Admin", "sublabel": "Navegador", "tag": "pass + TOTP", "pos": [40, 244], "size": [130, 62] },
+    { "id": "staff", "type": "external", "label": "Staff (puerta)", "sublabel": "Navegador + cámara", "tag": "pass", "pos": [40, 392], "size": [130, 62] },
+    { "id": "spa", "type": "frontend", "label": "SPA React", "sublabel": "Vite + React Router", "tag": "servida por Fastify", "pos": [270, 246], "size": [150, 66] },
+    { "id": "fastify", "type": "backend", "label": "Servidor Fastify", "sublabel": "Node 22 · TypeScript", "tag": "helmet · cookie · rate-limit", "pos": [510, 243], "size": [160, 72] },
+    { "id": "rutas", "type": "backend", "label": "Rutas API", "sublabel": "registro · auth · admin · staff", "tag": "prefijo /api", "pos": [760, 243], "size": [210, 72] },
+    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": "cliente pg (pool)", "tag": "consultas parametrizadas", "pos": [1080, 150], "size": [150, 66] },
+    { "id": "resend", "type": "external", "label": "Resend", "sublabel": "Email + QR", "tag": "SPF/DKIM", "pos": [1080, 350], "size": [150, 66] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Heroku (proceso web + Heroku Postgres)", "wraps": ["spa", "fastify", "rutas", "db"] },
+    { "kind": "security-group", "label": "Sesiones: cookie JWT (admin MFA · staff)", "wraps": ["fastify", "rutas"] }
+  ],
+  "connections": [
+    { "id": "asistente-spa", "from": "asistente", "to": "spa", "label": "HTTPS", "variant": "emphasis", "fromSide": "right", "toSide": "top", "labelDx": -20, "labelDy": 22 },
+    { "id": "admin-spa", "from": "admin", "to": "spa", "label": "HTTPS", "fromSide": "right", "toSide": "left" },
+    { "id": "staff-spa", "from": "staff", "to": "spa", "label": "HTTPS", "fromSide": "right", "toSide": "bottom", "labelDy": 14 },
+    { "id": "spa-fastify", "from": "spa", "to": "fastify", "label": "fetch /api", "variant": "emphasis" },
+    { "id": "fastify-rutas", "from": "fastify", "to": "rutas", "label": "registra plugins" },
+    { "id": "rutas-db", "from": "rutas", "to": "db", "label": "SQL parametrizado", "fromSide": "right", "toSide": "left", "labelDy": -18 },
+    { "id": "rutas-resend", "from": "rutas", "to": "resend", "label": "envía entrada", "variant": "dashed", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Clientes", "items": ["Asistente: registro público de la fiesta cerrada", "Admin: panel con contraseña + doble factor (TOTP)", "Staff: lector de QR en la puerta"] },
+    { "dot": "emerald", "title": "Aplicación", "items": ["Fastify (Node 22) sirve la API y la SPA de React", "Rutas: registro, auth/admin, staff y entrada", "helmet (CSP), cookies firmadas y rate limit"] },
+    { "dot": "violet", "title": "Datos y correo", "items": ["PostgreSQL vía pool pg con consultas parametrizadas", "Resend genera y envía la entrada con QR (SPF/DKIM)"] },
+    { "dot": "rose", "title": "Seguridad", "items": ["Sesión en cookie httpOnly firmada (JWT)", "Admin protegido con MFA; staff con contraseña", "QR de un solo uso validado en la puerta"] }
+  ]
+}

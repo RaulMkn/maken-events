@@ -163,6 +163,7 @@ Pages y su fuente vive en la carpeta [`docs/`](./docs).
 | Sección | Enlace |
 |---------|--------|
 | Arquitectura | https://raulmkn.github.io/maken-events/arquitectura.html |
+| Diagrama interactivo (Archify) | https://RaulMkn.github.io/maken-events/docs/arquitectura-diagrama.html |
 | Panel de administración | https://raulmkn.github.io/maken-events/guia-admin.html |
 | Puerta (staff) | https://raulmkn.github.io/maken-events/guia-staff.html |
 | Referencia de la API | https://raulmkn.github.io/maken-events/api.html |
