@@ -37,7 +37,11 @@ await app.register(helmet, {
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
+      // El lector de QR (qr-scanner) usa un Web Worker que puede cargarse
+      // como blob:, por eso permitimos scriptSrc/workerSrc con blob:.
+      scriptSrc: ["'self'", 'blob:'],
+      workerSrc: ["'self'", 'blob:'],
+      childSrc: ["'self'", 'blob:'],
       // Fuentes de Google: la hoja de estilos viene de fonts.googleapis.com
       // y los ficheros de fuente de fonts.gstatic.com.
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],

@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import QrScanner from 'qr-scanner';
+// La ruta del worker de qr-scanner: Vite la resuelve y empaqueta con esta URL.
+import qrWorkerUrl from 'qr-scanner/qr-scanner-worker.min.js?url';
 import { verificarEntrada, logoutStaff, type ResultadoVerificacion } from '../api.ts';
+
+// Le decimos a qr-scanner dónde está su worker (evita que intente cargarlo
+// como Blob, lo que fallaría con la CSP y dejaría el escáner sin detectar).
+QrScanner.WORKER_PATH = qrWorkerUrl;
 
 /**
  * Lector de QR para la puerta. Usa la cámara del dispositivo (trasera si hay).
