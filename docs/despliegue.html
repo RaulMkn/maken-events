@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Despliegue · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html" class="activo">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Despliegue</h1>
+      <p class="lede">La aplicación se despliega en Heroku con el buildpack de Node.</p>
+
+      <h2 style="border:none;padding-top:0;">Cómo funciona el build</h2>
+      <p>El <code>package.json</code> de la raíz define <code>heroku-postbuild</code>, que:</p>
+      <ol>
+        <li>Instala y compila el <strong>frontend</strong> (Vite).</li>
+        <li>Copia el resultado a <code>backend/public</code>.</li>
+        <li>Instala y compila el <strong>backend</strong> (TypeScript).</li>
+      </ol>
+      <p>El proceso web (<code>Procfile</code>) arranca <code>node backend/dist/server.js</code>, que
+        sirve API y frontend. Al arrancar, <code>initDb</code> crea y migra las tablas.</p>
+
+      <h2>Desplegar</h2>
+      <pre><code>git push heroku main</code></pre>
+      <p>Y, para tener copia del código en GitHub:</p>
+      <pre><code>git push origin main</code></pre>
+
+      <h2>Variables de entorno (config vars)</h2>
+      <p>Se configuran en Heroku, no en <code>.env</code>. Mínimas para funcionar:</p>
+      <table>
+        <tr><th>Variable</th><th>Descripción</th></tr>
+        <tr><td><code>DATABASE_URL</code></td><td>La inyecta el add-on Heroku Postgres.</td></tr>
+        <tr><td><code>SESSION_SECRET</code></td><td>Cadena larga y aleatoria.</td></tr>
+        <tr><td><code>ADMIN_USER</code></td><td>Usuario admin (por defecto <code>admin</code>).</td></tr>
+        <tr><td><code>ADMIN_PASSWORD_HASH</code></td><td>Hash <code>b64:...</code> generado por <code>gen-admin</code>.</td></tr>
+        <tr><td><code>ADMIN_TOTP_SECRET</code></td><td>Secreto TOTP generado por <code>gen-admin</code>.</td></tr>
+        <tr><td><code>STAFF_PASSWORD</code></td><td>Contraseña compartida del equipo de puerta.</td></tr>
+        <tr><td><code>RESEND_API_KEY</code></td><td>API key de Resend.</td></tr>
+        <tr><td><code>EMAIL_FROM</code></td><td>Remitente del dominio verificado (ej. <code>entradas@maken-events.app</code>).</td></tr>
+        <tr><td><code>PARTY_NAME</code></td><td>Nombre del evento.</td></tr>
+      </table>
+      <pre><code>heroku config:set SESSION_SECRET="…" STAFF_PASSWORD="…" \
+  RESEND_API_KEY="re_…" EMAIL_FROM="entradas@maken-events.app" \
+  --app maken-events</code></pre>
+
+      <h2>Generar credenciales del admin</h2>
+      <pre><code>cd backend
+npm run gen-admin -- "TuContraseñaSegura"</code></pre>
+      <p>Muestra el <code>ADMIN_PASSWORD_HASH</code>, el <code>ADMIN_TOTP_SECRET</code> y un QR para
+        escanear con tu app de autenticación. Copia los dos valores a las config vars.</p>
+
+      <h2>Dominio y email</h2>
+      <ul>
+        <li><strong>Dominio</strong>: <code>maken-events.app</code> apuntado a Heroku (ANAME en la raíz,
+          CNAME en <code>www</code>), con certificado automático (ACM).</li>
+        <li><strong>Email</strong>: Resend con el dominio verificado (registros SPF/DKIM en el DNS).
+          Sin esa verificación, los correos irían a spam.</li>
+      </ul>
+
+      <div class="aviso alerta">
+        Si reinicias o reseteas la base de datos con la app corriendo, reinicia el dyno
+        (<code>heroku restart</code>) para que <code>initDb</code> vuelva a crear las tablas.
+      </div>
+
+      <h2>Publicar esta documentación (GitHub Pages)</h2>
+      <p>En GitHub → <strong>Settings → Pages</strong> → Source: <em>Deploy from a branch</em> →
+        rama <code>main</code>, carpeta <code>/docs</code>. El sitio queda disponible en
+        <code>https://raulmkn.github.io/maken-events/</code>.</p>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

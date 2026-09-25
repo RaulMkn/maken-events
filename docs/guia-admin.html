@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de administración · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html" class="activo">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Panel de administración</h1>
+      <p class="lede">Gestiona asistentes, confirma pagos y controla las finanzas del evento.</p>
+
+      <h2 style="border:none;padding-top:0;">Acceso</h2>
+      <p>Entra en <code>/admin</code>. Necesitas tres cosas:</p>
+      <ul>
+        <li>El <strong>usuario</strong> (por defecto <code>admin</code>).</li>
+        <li>Tu <strong>contraseña</strong>.</li>
+        <li>El <strong>código de 6 dígitos</strong> de tu app de autenticación (Google Authenticator, Authy…).</li>
+      </ul>
+      <p>Las credenciales se generan con el script <code>gen-admin</code> (ver
+        <a href="despliegue.html">Despliegue</a>). El código cambia cada 30 s: introdúcelo rápido.</p>
+
+      <div class="aviso alerta">
+        Si te da "credenciales incorrectas" y estás seguro de la contraseña, revisa que la
+        hora del móvil esté sincronizada (el TOTP depende de la hora).
+      </div>
+
+      <h2>Pestaña "Asistentes"</h2>
+      <p>Arriba tienes un selector de fiesta (por ahora solo Halloween) y las pestañas
+        Asistentes / Finanzas. En Asistentes ves:</p>
+      <ul>
+        <li><strong>Resumen</strong>: total, pagados, pendientes, ya dentro y disfrazados.</li>
+        <li><strong>Lista agrupada por "de parte de quién"</strong>: así puedes validar con cada
+          amigo que reconoce a los suyos antes de confirmar pagos.</li>
+      </ul>
+
+      <h3>Confirmar un pago</h3>
+      <p>Cuando alguien te ha pagado, pulsa <strong>Confirmar pago</strong> en su fila. Esto:</p>
+      <ol>
+        <li>Lo marca como pagado y registra el precio vigente en ese momento.</li>
+        <li>Genera su entrada con un QR único.</li>
+        <li>Le envía la entrada por email automáticamente.</li>
+      </ol>
+      <p>Si el email fallara, el pago igual queda confirmado y podrás usar
+        <strong>Reenviar entrada</strong> más tarde.</p>
+
+      <h3>Otras acciones</h3>
+      <ul>
+        <li><strong>Reenviar entrada</strong>: vuelve a enviar el email a un asistente ya pagado.</li>
+        <li><strong>Eliminar</strong>: borra a una persona. Si estaba pagada, su QR deja de valer en la puerta (útil para expulsar).</li>
+        <li><strong>Exportar CSV</strong>: descarga toda la lista (copia de seguridad y lista para la puerta).</li>
+      </ul>
+
+      <h2>Pestaña "Finanzas"</h2>
+      <ul>
+        <li><strong>Precio de entrada</strong>: fíjalo en euros. Afecta solo a los pagos que
+          confirmes a partir de ese momento; los ya confirmados mantienen su precio.</li>
+        <li><strong>Gastos</strong>: añade conceptos con su importe (hielo, vasos, etc.) y bórralos.</li>
+        <li><strong>Resumen</strong>: ingresos (por lo realmente pagado), gastos y beneficio neto.</li>
+      </ul>
+
+      <h2>Recomendación para la noche del evento</h2>
+      <ul>
+        <li>Exporta el CSV como respaldo antes de la fiesta.</li>
+        <li>Confirma los pagos con antelación para que a la gente le llegue el QR a tiempo.</li>
+      </ul>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

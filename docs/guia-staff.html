@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puerta (staff) · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html" class="activo">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Puerta (staff)</h1>
+      <p class="lede">El lector de QR para validar entradas la noche del evento.</p>
+
+      <h2 style="border:none;padding-top:0;">Acceso</h2>
+      <p>Entra en <code>/staff</code> desde el móvil que vaya a estar en la puerta. Pide
+        una <strong>contraseña compartida</strong> (la misma para todo el equipo, sin doble factor).</p>
+
+      <div class="aviso">
+        La cámara solo funciona sobre <strong>HTTPS</strong>. En <code>maken-events.app</code> ya lo es.
+        El navegador pedirá permiso de cámara la primera vez: acéptalo.
+      </div>
+
+      <h2>Cómo escanear</h2>
+      <ol>
+        <li>Tras iniciar sesión, se abre la cámara.</li>
+        <li>Apunta al QR de la entrada del invitado (desde su móvil o impreso).</li>
+        <li>El resultado aparece en pantalla y se queda visible unos 10 segundos, o hasta
+          que escanees otra entrada.</li>
+      </ol>
+
+      <h2>Resultados posibles</h2>
+      <table>
+        <tr><th>Resultado</th><th>Significado</th><th>Acción</th></tr>
+        <tr><td>✅ <strong>Válida</strong></td><td>Entrada correcta y aún no usada. Muestra el nombre.</td><td>Dejar pasar. Queda marcada como usada.</td></tr>
+        <tr><td>⚠️ <strong>Ya se usó</strong></td><td>Ese QR ya se escaneó antes.</td><td>No dejar pasar. Posible intento de colarse con un QR reenviado.</td></tr>
+        <tr><td>⛔ <strong>No válida</strong></td><td>QR desconocido o pago no confirmado.</td><td>No dejar pasar. Comprobar con el admin.</td></tr>
+      </table>
+
+      <div class="aviso alerta">
+        Cada QR sirve <strong>una sola vez</strong>. Si alguien reenvía su QR a un amigo, el
+        segundo escaneo dará "ya se usó".
+      </div>
+
+      <h2>Si algo falla</h2>
+      <ul>
+        <li><strong>"Sin conexión con el servidor"</strong>: problema de red. Reintenta el escaneo;
+          con mejor cobertura funcionará.</li>
+        <li><strong>La cámara no abre</strong>: revisa el permiso de cámara del navegador y que sea HTTPS.</li>
+        <li><strong>Plan B</strong>: si la puerta se queda sin conexión, usa el CSV exportado
+          desde el panel admin para comprobar quién ha pagado a mano.</li>
+      </ul>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

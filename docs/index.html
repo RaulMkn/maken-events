@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>maken-events · Documentación</title>
+  <meta name="description" content="Documentación de maken-events: web de registro y entradas para eventos." />
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+
+      <nav>
+        <div class="nav-grupo">
+          <h4>Introducción</h4>
+          <a href="index.html" class="activo">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo">
+          <h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo">
+          <h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo">
+          <h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>maken-events</h1>
+      <p class="lede">
+        Plataforma web para el registro de asistentes y la venta manual de
+        entradas a eventos privados. Esta es la documentación de la versión 1.0.
+      </p>
+
+      <div class="tarjeta">
+        <strong>En producción:</strong>
+        <a href="https://maken-events.app" target="_blank" rel="noopener">https://maken-events.app</a>
+        &nbsp;·&nbsp; <span class="badge">v1.0</span>
+      </div>
+
+      <h2 style="border:none; padding-top:0;">Por dónde empezar</h2>
+      <div class="grid-cards">
+        <a href="arquitectura.html">
+          <h3>Arquitectura</h3>
+          <p>Cómo encajan backend, base de datos y frontend.</p>
+        </a>
+        <a href="guia-admin.html">
+          <h3>Panel de administración</h3>
+          <p>Confirmar pagos, finanzas y gestión de asistentes.</p>
+        </a>
+        <a href="guia-staff.html">
+          <h3>Puerta (staff)</h3>
+          <p>Escanear entradas la noche del evento.</p>
+        </a>
+        <a href="api.html">
+          <h3>Referencia de la API</h3>
+          <p>Todos los endpoints, con cuerpos y respuestas.</p>
+        </a>
+        <a href="datos.html">
+          <h3>Modelo de datos</h3>
+          <p>Tablas, campos y decisiones (precios en céntimos, etc.).</p>
+        </a>
+        <a href="despliegue.html">
+          <h3>Despliegue</h3>
+          <p>Cómo se publica en Heroku y variables necesarias.</p>
+        </a>
+      </div>
+
+      <h2>Qué hace</h2>
+      <ul>
+        <li><strong>Home de eventos:</strong> selector de fiestas (Halloween activo; Carnaval "próximamente").</li>
+        <li><strong>Registro público:</strong> con "de parte de quién vienes" (fiesta cerrada) y aceptación de condiciones.</li>
+        <li><strong>Panel de administración</strong> protegido con contraseña + doble factor (TOTP): lista de asistentes, confirmación de pago (genera QR y envía la entrada por email) y panel de finanzas.</li>
+        <li><strong>Panel de staff</strong> con contraseña simple: lector de QR por cámara que valida entradas y las marca como usadas (un solo uso).</li>
+      </ul>
+
+      <h2>Stack</h2>
+      <table>
+        <tr><th>Capa</th><th>Tecnología</th></tr>
+        <tr><td>Backend</td><td>Node 22 · Fastify · TypeScript (sirve también el frontend)</td></tr>
+        <tr><td>Base de datos</td><td>PostgreSQL (cliente <code>pg</code>)</td></tr>
+        <tr><td>Frontend</td><td>React 19 · Vite · TypeScript · React Router</td></tr>
+        <tr><td>Email</td><td>Resend (dominio propio con SPF/DKIM)</td></tr>
+        <tr><td>QR</td><td><code>qrcode</code> (generar) · <code>qr-scanner</code> (leer)</td></tr>
+        <tr><td>Seguridad</td><td>argon2 · TOTP (otplib) · JWT en cookie</td></tr>
+        <tr><td>Despliegue</td><td>Heroku (buildpack Node) + Heroku Postgres</td></tr>
+      </table>
+
+      <footer>
+        maken-events · Documentación v1.0 · Generada para el proyecto de eventos.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

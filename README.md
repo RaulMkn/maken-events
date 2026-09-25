@@ -1,77 +1,163 @@
-# maken-events — Web de eventos y entradas
+# maken-events
 
-Web para registro de asistentes y venta manual de entradas a eventos privados
-(actualmente la fiesta de Halloween). En producción: **https://maken-events.app**
+Plataforma web para el registro de asistentes y la venta manual de entradas a
+eventos privados. En producción: **https://maken-events.app**
 
-## Qué hace
+> Versión 1.0 — documentación completa en el sitio de GitHub Pages (ver
+> [Documentación](#documentación)).
 
-- **Home de eventos**: selector de fiestas (Halloween activo; Carnaval "próximamente").
-- **Landing del evento** con la info de la fiesta y botón de registro.
-- **Registro** de asistentes: nombre, apellidos (opcional), email, de parte de quién,
-  ¿disfrazado? + disfraz. Requiere aceptar las condiciones (con lectura obligatoria).
-- **Panel admin** (`/admin`) protegido con contraseña + TOTP (MFA):
-  - Listado de asistentes agrupado por "de parte de quién".
-  - Confirmar pago (genera QR y envía la entrada por email), reenviar y eliminar.
-  - Dashboard financiero: precio configurable, gastos, ingresos y beneficio.
-- **Panel de staff** (`/staff`) protegido con contraseña simple (sin MFA):
-  lector de QR por cámara que valida entradas y las marca como usadas (un solo uso).
+---
+
+## Qué es
+
+`maken-events` es una web pensada para gestionar la entrada a fiestas privadas
+de principio a fin, sin pasarela de pago (el pago se confirma a mano):
+
+- **Home de eventos**: selector de fiestas. La primera es Halloween; Carnaval
+  aparece como "próximamente".
+- **Registro público**: la gente se apunta indicando de parte de quién viene
+  (la fiesta es cerrada) y si va disfrazada. Debe aceptar las condiciones.
+- **Panel de administración** (con contraseña + doble factor): lista de
+  asistentes agrupada, confirmación de pago (que genera la entrada con QR y la
+  envía por email), y un panel de finanzas (precio, gastos, beneficio).
+- **Panel de staff** (con contraseña simple): lector de QR por cámara para
+  validar entradas en la puerta. Cada QR sirve **una sola vez**.
+
+## Funcionalidades
+
+- Registro con validación y control de duplicados por email.
+- Campo obligatorio "de parte de quién vienes" para mantener la fiesta cerrada.
+- Aceptación de condiciones con lectura obligatoria (scroll) antes de aceptar.
+- Confirmación de pago manual → genera un QR único y envía la entrada por email.
+- Reenvío de entradas y eliminación de asistentes desde el panel.
+- Escáner de QR en la puerta que marca la entrada como usada (un solo uso).
+- Dashboard financiero: precio de entrada configurable, gastos, ingresos
+  (por lo realmente pagado por cada asistente) y beneficio neto.
+- Exportación de la lista de asistentes a CSV.
 
 ## Stack
 
-- **Backend**: Node + Fastify + TypeScript. Sirve también el frontend estático.
-- **Base de datos**: PostgreSQL (cliente `pg`).
-- **Frontend**: React + Vite + TypeScript.
-- **Email**: SMTP (Gmail) con nodemailer; QR con `qrcode`.
-- **Auth**: argon2 (contraseña admin) + TOTP (otplib); sesiones con JWT en cookie.
-- **Despliegue**: Heroku (app `maken-events`) con add-on Heroku Postgres.
+| Capa        | Tecnología |
+|-------------|------------|
+| Backend     | Node 22, Fastify, TypeScript (sirve también el frontend) |
+| Base de datos | PostgreSQL (cliente `pg`) |
+| Frontend    | React 19, Vite, TypeScript, React Router |
+| Email       | Resend (dominio propio verificado con SPF/DKIM) |
+| QR          | `qrcode` (generación) y `qr-scanner` (lectura por cámara) |
+| Seguridad   | argon2 (contraseña admin), TOTP (otplib), JWT en cookie |
+| Despliegue  | Heroku (buildpack de Node) + Heroku Postgres |
 
-## Estructura
+## Estructura del repositorio
 
 ```
-fest/
-├── backend/         API Fastify + TS (sirve el frontend en producción)
+maken-events/
+├── package.json          orquesta el build (heroku-postbuild) y el arranque
+├── Procfile              proceso web para Heroku
+├── .env.example          plantilla de variables de entorno
+├── scripts/
+│   └── replica-local.sh  descarga la BD de Heroku y la replica en Docker
+├── backend/
 │   ├── src/
-│   │   ├── routes/  registro, auth, admin, staff, entrada
-│   │   ├── lib/     auth, sesión, email, qr-token, validación
-│   │   └── db.ts    esquema y acceso a Postgres
-│   └── scripts/     gen-admin (credenciales), preview-email
-├── frontend/        React + Vite (páginas: Eventos, Landing, Registro, Admin, Staff)
-├── package.json     orquesta el build para Heroku (heroku-postbuild)
-├── Procfile         arranque en Heroku
-└── .env.example     plantilla de variables de entorno
+│   │   ├── server.ts     arranque de Fastify, seguridad, rutas, estáticos
+│   │   ├── config.ts     configuración desde variables de entorno
+│   │   ├── db.ts         conexión, esquema y migraciones de PostgreSQL
+│   │   ├── routes/       registro, auth, admin, staff, entrada
+│   │   └── lib/          auth, sesión, protección de rutas, email, validación
+│   └── scripts/          gen-admin, smoke-test, preview-email
+└── frontend/
+    ├── src/
+    │   ├── main.tsx       router
+    │   ├── api.ts         cliente HTTP
+    │   ├── paginas/       Eventos, Landing, Registro, Admin, Staff
+    │   └── componentes/   LoginAdmin, PanelAdmin, DashboardFinanzas, LoginStaff, EscanerQR
+    ├── public/            favicon, imagen social
+    └── index.html
 ```
+
+## Requisitos
+
+- Node.js 22.x
+- Una base de datos PostgreSQL (local, en Docker, o Heroku Postgres)
+- Cuenta de Resend con un dominio verificado (para enviar emails)
 
 ## Desarrollo local
 
-Requiere una base de datos PostgreSQL accesible (local o Docker).
+```bash
+# 1. Base de datos: por ejemplo, PostgreSQL en Docker
+docker run -d --name fiesta-db -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=fiesta -p 5432:5432 postgres:16-alpine
 
-```
-# Backend
-cd backend && npm install
-DATABASE_URL=postgres://... npm run dev
+# 2. Backend
+cd backend
+npm install
+npm run gen-admin -- "TuContraseñaDeAdmin"   # genera hash + TOTP (escanea el QR)
+# copia ADMIN_PASSWORD_HASH y ADMIN_TOTP_SECRET a tu entorno
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/fiesta npm run dev
 
-# Frontend (en otra terminal)
-cd frontend && npm install && npm run dev
-```
-
-Genera credenciales de admin con:
-
-```
-cd backend && npm run gen-admin -- "TuContraseña"
+# 3. Frontend (en otra terminal)
+cd frontend
+npm install
+npm run dev        # http://localhost:5173 (proxya /api al backend)
 ```
 
 ## Variables de entorno
 
 Ver `.env.example`. En producción se configuran como *config vars* de Heroku,
-no en un fichero `.env`. Las principales: `DATABASE_URL`, `SESSION_SECRET`,
-`QR_TOKEN_SECRET`, `ADMIN_USER`/`ADMIN_PASSWORD_HASH`/`ADMIN_TOTP_SECRET`,
-`STAFF_PASSWORD`, y el bloque SMTP (`SMTP_HOST`/`PORT`/`SECURE`/`USER`/`PASS`, `EMAIL_FROM`).
+no en un fichero `.env`.
 
-## Despliegue
+| Variable | Descripción |
+|----------|-------------|
+| `NODE_ENV` | `production` en producción |
+| `PORT` | Puerto del backend (Heroku lo inyecta) |
+| `DATABASE_URL` | Cadena de conexión a PostgreSQL (obligatoria en producción) |
+| `DATABASE_SSL` | `true` en Heroku |
+| `SESSION_SECRET` | Secreto para firmar las cookies de sesión (obligatorio en producción) |
+| `ADMIN_USER` | Usuario del admin (por defecto `admin`) |
+| `ADMIN_PASSWORD_HASH` | Hash de la contraseña admin en formato `b64:...` (lo genera `gen-admin`) |
+| `ADMIN_TOTP_SECRET` | Secreto TOTP del admin (lo genera `gen-admin`) |
+| `STAFF_PASSWORD` | Contraseña compartida del equipo de puerta |
+| `RESEND_API_KEY` | API key de Resend |
+| `EMAIL_FROM` | Remitente (una dirección del dominio verificado) |
+| `PARTY_NAME` | Nombre del evento para asuntos y plantillas |
 
-```
+## Scripts
+
+**Raíz** (usados por Heroku):
+- `heroku-postbuild` — compila frontend, lo copia al backend y compila el backend.
+- `start` — arranca el servidor.
+
+**backend/**:
+- `npm run dev` — desarrollo con recarga.
+- `npm run build` — compila TypeScript.
+- `npm run gen-admin -- "contraseña"` — genera credenciales del admin (hash + TOTP + QR).
+- `npm run smoke-test` — prueba de humo del flujo crítico contra una instancia local.
+
+**frontend/**:
+- `npm run dev` — servidor de desarrollo (Vite).
+- `npm run build` — build de producción.
+
+## Despliegue (Heroku)
+
+```bash
 git push heroku main
 ```
 
-El build compila frontend y backend, y el frontend se sirve desde el propio backend.
-El esquema de la base de datos se crea/migra solo al arrancar.
+El esquema de la base de datos se crea y migra solo al arrancar (`initDb`).
+Config vars necesarias: las de la tabla de arriba (mínimo `DATABASE_URL`,
+`SESSION_SECRET`, credenciales de admin, `STAFF_PASSWORD`, `RESEND_API_KEY`).
+
+## Operativa y respaldo
+
+- **Backups de Heroku**: `heroku pg:backups:capture` y `heroku pg:backups:download`.
+- **Exportar CSV**: botón en el panel admin (copia de la lista y respaldo).
+- **Réplica local**: `./scripts/replica-local.sh` descarga la BD de producción
+  y la restaura en una PostgreSQL en Docker (`localhost:5433`).
+
+## Documentación
+
+La documentación completa (arquitectura, referencia de la API, modelo de datos,
+guías de administración y de puerta, despliegue y RGPD) está en el sitio de
+GitHub Pages, servido desde la carpeta [`docs/`](./docs).
+
+> Para publicarlo: en GitHub → Settings → Pages → Source: *Deploy from a branch*
+> → rama `main`, carpeta `/docs`.

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquitectura · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html" class="activo">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Arquitectura</h1>
+      <p class="lede">Una sola aplicación Node que sirve la API y el frontend, con PostgreSQL detrás.</p>
+
+      <h2 style="border:none;padding-top:0;">Visión general</h2>
+      <p>
+        En producción hay <strong>un único proceso</strong>: un servidor Fastify que
+        expone la API bajo <code>/api</code> y, además, sirve los ficheros estáticos
+        del frontend (React ya compilado). No hay servidor web aparte ni proxy:
+        Heroku pone el HTTPS por delante y el propio backend responde todo.
+      </p>
+
+      <pre><code>Navegador
+   │  HTTPS
+   ▼
+Heroku (router + TLS)
+   │
+   ▼
+Fastify  ──►  /api/*           (registro, admin, staff, entrada)
+   │      └─►  resto de rutas    (index.html + assets de React)
+   ▼
+PostgreSQL (Heroku Postgres)</code></pre>
+
+      <h2>Flujo de una petición</h2>
+      <ul>
+        <li>Las llamadas a <code>/api/...</code> las manejan las rutas del backend.</li>
+        <li>Cualquier otra ruta devuelve <code>index.html</code> (SPA): el enrutado del
+          cliente (<code>/</code>, <code>/halloween</code>, <code>/admin</code>, <code>/staff</code>…) lo resuelve React Router.</li>
+      </ul>
+
+      <h2>Backend</h2>
+      <p>Organizado en <code>backend/src</code>:</p>
+      <table>
+        <tr><th>Fichero</th><th>Responsabilidad</th></tr>
+        <tr><td><code>server.ts</code></td><td>Arranque de Fastify, cabeceras de seguridad (helmet + CSP), rate limiting, cookies, registro de rutas y servido del frontend.</td></tr>
+        <tr><td><code>config.ts</code></td><td>Lee y valida las variables de entorno. Falla al arrancar si falta algo crítico en producción.</td></tr>
+        <tr><td><code>db.ts</code></td><td>Pool de PostgreSQL, creación del esquema y migraciones idempotentes (<code>initDb</code>), helpers de ajustes.</td></tr>
+        <tr><td><code>routes/</code></td><td><code>registro</code>, <code>auth</code> (admin), <code>admin</code>, <code>staff</code>, <code>entrada</code>.</td></tr>
+        <tr><td><code>lib/</code></td><td><code>auth</code> (argon2 + TOTP), <code>sesion</code> (JWT en cookie), <code>proteger-admin</code>/<code>proteger-staff</code> (guardas), <code>email</code> (Resend + QR), <code>validacion</code>.</td></tr>
+      </table>
+
+      <h2>Frontend</h2>
+      <p>React + Vite en <code>frontend/src</code>. Páginas principales:</p>
+      <table>
+        <tr><th>Ruta</th><th>Página</th><th>Descripción</th></tr>
+        <tr><td><code>/</code></td><td>Eventos</td><td>Home neutra: selector de eventos.</td></tr>
+        <tr><td><code>/halloween</code></td><td>Landing</td><td>Info del evento y botón de registro.</td></tr>
+        <tr><td><code>/halloween/registro</code></td><td>Registro</td><td>Formulario + condiciones.</td></tr>
+        <tr><td><code>/admin</code></td><td>Admin</td><td>Login con MFA + panel (Asistentes / Finanzas).</td></tr>
+        <tr><td><code>/staff</code></td><td>Staff</td><td>Login simple + lector de QR.</td></tr>
+      </table>
+
+      <h2>Build y despliegue</h2>
+      <p>
+        El <code>package.json</code> de la raíz orquesta el build de Heroku
+        (<code>heroku-postbuild</code>): compila el frontend, copia el resultado a
+        <code>backend/public</code> y compila el backend. Al arrancar, <code>initDb</code>
+        crea y migra las tablas automáticamente. Detalles en
+        <a href="despliegue.html">Despliegue</a>.
+      </p>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

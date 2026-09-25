@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seguridad y RGPD · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html" class="activo">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Seguridad y RGPD</h1>
+      <p class="lede">Medidas de seguridad de la aplicación y tratamiento de datos personales.</p>
+
+      <h2 style="border:none;padding-top:0;">Medidas de seguridad</h2>
+      <ul>
+        <li><strong>HTTPS</strong> en todo el tráfico (certificado gestionado por Heroku).</li>
+        <li><strong>Contraseña del admin con argon2</strong>: nunca se guarda en claro, solo su hash.</li>
+        <li><strong>Doble factor (TOTP)</strong> obligatorio para el panel admin.</li>
+        <li><strong>Consultas parametrizadas</strong> en toda la base de datos: sin inyección SQL.</li>
+        <li><strong>Rate limiting</strong>: límite de intentos en login (5/5 min admin, 10/5 min staff) y en el registro (10/min).</li>
+        <li><strong>Cabeceras de seguridad</strong> (helmet + CSP): restringen scripts, estilos y orígenes. La CSP permite las fuentes de Google y el worker del lector de QR.</li>
+        <li><strong>Cookies de sesión</strong> httpOnly + SameSite strict + secure: no accesibles por JavaScript ni enviadas desde otros sitios.</li>
+        <li><strong>QR de un solo uso</strong>: cada entrada se invalida al escanearse.</li>
+        <li><strong>Base de datos no expuesta</strong>: solo la app habla con ella, con SSL.</li>
+      </ul>
+
+      <div class="aviso">
+        Para el tamaño del proyecto (evento privado) no se incluyen WAF, anti-DDoS avanzado
+        ni cifrado a nivel de campo: serían desproporcionados. Las defensas anteriores cubren
+        los riesgos habituales.
+      </div>
+
+      <h2>Roles y accesos</h2>
+      <table>
+        <tr><th>Rol</th><th>Acceso</th><th>Autenticación</th></tr>
+        <tr><td>Público</td><td>Home, registro</td><td>Ninguna</td></tr>
+        <tr><td>Staff</td><td>Lector de QR en la puerta</td><td>Contraseña compartida (sin MFA)</td></tr>
+        <tr><td>Admin</td><td>Panel completo, finanzas, datos</td><td>Contraseña + TOTP</td></tr>
+      </table>
+
+      <h2>Datos personales (RGPD)</h2>
+      <p>Se recogen <strong>nombre, apellidos (opcional) y email</strong>, más el disfraz y de parte
+        de quién viene. Medidas aplicadas:</p>
+      <ul>
+        <li><strong>Finalidad declarada</strong>: nota de privacidad en el formulario de registro y
+          cláusula en las condiciones. Se explica que los datos se usan solo para gestionar y
+          enviar la entrada, que no se ceden y que se borran tras el evento.</li>
+        <li><strong>Minimización en logs</strong>: los registros del servidor no vuelcan nombres ni
+          correos; solo identificadores internos.</li>
+        <li><strong>Derecho de acceso y borrado</strong>: el botón "Eliminar" del panel borra a una
+          persona; el aviso indica cómo pedir ver o borrar los datos.</li>
+        <li><strong>Conservación limitada</strong>: recomendación de borrar los datos tras la fiesta.</li>
+      </ul>
+
+      <div class="aviso alerta">
+        Estas son medidas prácticas razonables para un evento privado, no un dictamen legal.
+        Como responsable de los datos, usa los correos solo para la entrada y bórralos al terminar.
+      </div>
+
+      <h2>Buenas prácticas de operación</h2>
+      <ul>
+        <li>Protege tus credenciales de admin y no compartas más de lo necesario la del staff.</li>
+        <li>Mantén 2FA en las cuentas de Heroku, GitHub y el proveedor de email.</li>
+        <li>No subas nunca el fichero <code>.env</code> ni los <code>.dump</code> al repositorio (ya están en <code>.gitignore</code>).</li>
+      </ul>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

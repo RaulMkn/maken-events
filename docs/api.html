@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html" class="activo">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Referencia de la API</h1>
+      <p class="lede">Todos los endpoints van bajo <code>/api</code>. Las respuestas son JSON salvo el CSV.</p>
+
+      <div class="aviso">
+        <strong>Autenticación.</strong> Las rutas de admin requieren la cookie de sesión
+        de administrador (login con contraseña + TOTP). Las de staff requieren la cookie
+        de sesión de staff (login con contraseña). Sin la cookie válida devuelven <code>401</code>.
+      </div>
+
+      <h2 style="border:none;padding-top:0;">Público</h2>
+
+      <h3><span class="metodo post">POST</span> <code>/api/registro</code></h3>
+      <p>Registra un asistente. Rate limit: 10 peticiones/minuto. Controla duplicados por email.</p>
+      <p><strong>Cuerpo:</strong></p>
+      <pre><code>{
+  "nombre": "Ada",                 // obligatorio
+  "apellidos": "Lovelace",         // opcional
+  "email": "ada@example.com",      // obligatorio, único
+  "disfrazado": true,              // obligatorio
+  "disfraz": "bruja",              // obligatorio si disfrazado = true
+  "deParteDe": "Maken",            // obligatorio (fiesta cerrada)
+  "aceptaCondiciones": true        // obligatorio, debe ser true
+}</code></pre>
+      <p><strong>Respuestas:</strong> <code>201</code> ok · <code>400</code> validación · <code>409</code> email ya registrado.</p>
+
+      <h3><span class="metodo get">GET</span> <code>/api/health</code></h3>
+      <p>Comprobación de salud. Devuelve <code>{ "ok": true }</code>.</p>
+
+      <h2>Administración</h2>
+      <p>Prefijo <code>/api/admin</code>. Todas exigen sesión de admin (salvo el login).</p>
+
+      <h3><span class="metodo post">POST</span> <code>/api/admin/login</code></h3>
+      <p>Login con doble factor. Rate limit: 5 intentos/5 minutos.</p>
+      <pre><code>{ "usuario": "admin", "password": "…", "totp": "123456" }</code></pre>
+      <p>Devuelve <code>200</code> y establece la cookie de sesión, o <code>401</code>.</p>
+
+      <h3><span class="metodo post">POST</span> <code>/api/admin/logout</code> &nbsp; <span class="metodo get">GET</span> <code>/api/admin/sesion</code></h3>
+      <p>Cierra sesión / comprueba si la sesión sigue activa.</p>
+
+      <h3><span class="metodo get">GET</span> <code>/api/admin/asistentes</code></h3>
+      <p>Devuelve el resumen y la lista de asistentes.</p>
+      <pre><code>{
+  "resumen": { "total": 12, "pagados": 8, "pendientes": 4, "disfrazados": 9, "entrados": 3 },
+  "asistentes": [ { "id": "...", "nombre": "...", "deParteDe": "...", "estadoPago": "pagado",
+                    "emailEnviado": true, "haEntrado": false, "precioPagadoCentimos": 700, ... } ]
+}</code></pre>
+
+      <h3><span class="metodo get">GET</span> <code>/api/admin/asistentes.csv</code></h3>
+      <p>Descarga la lista completa en CSV (con BOM para Excel). Útil como copia y lista de puerta.</p>
+
+      <h3><span class="metodo post">POST</span> <code>/api/admin/asistentes/:id/confirmar-pago</code></h3>
+      <p>Marca el pago como confirmado, fija el <strong>precio pagado</strong> (el vigente en
+        ese momento), genera un código de QR único y envía la entrada por email.</p>
+      <pre><code>// respuesta si el email salió
+{ "ok": true, "emailEnviado": true }
+// si el email falló (el pago SÍ queda confirmado)
+{ "ok": true, "emailEnviado": false, "aviso": "…revisa el correo…" }</code></pre>
+      <p><code>409</code> si ya estaba pagado.</p>
+
+      <h3><span class="metodo post">POST</span> <code>/api/admin/asistentes/:id/reenviar-email</code></h3>
+      <p>Reenvía la entrada de un asistente ya confirmado.</p>
+
+      <h3><span class="metodo delete">DELETE</span> <code>/api/admin/asistentes/:id</code></h3>
+      <p>Elimina un asistente. Si estaba pagado, su QR deja de ser válido en la puerta.</p>
+
+      <h3><span class="metodo get">GET</span> / <span class="metodo put">PUT</span> <code>/api/admin/ajustes</code></h3>
+      <p>Lee o fija el precio de entrada. El importe va en <strong>céntimos</strong>.</p>
+      <pre><code>PUT  { "precioEntradaCentimos": 700 }   // 7,00 €</code></pre>
+
+      <h3><span class="metodo get">GET</span> / <span class="metodo post">POST</span> <code>/api/admin/gastos</code> &nbsp; <span class="metodo delete">DELETE</span> <code>/api/admin/gastos/:id</code></h3>
+      <p>Gestión de gastos del evento (dashboard financiero). Importe en céntimos.</p>
+      <pre><code>POST { "concepto": "Hielo y vasos", "importeCentimos": 1250 }</code></pre>
+
+      <h3><span class="metodo get">GET</span> <code>/api/admin/finanzas</code></h3>
+      <p>Resumen económico. Los ingresos son la suma de lo <em>realmente pagado</em> por los confirmados.</p>
+      <pre><code>{ "ingresosCentimos": 5600, "gastosCentimos": 1250,
+  "beneficioCentimos": 4350, "precioEntradaCentimos": 700 }</code></pre>
+
+      <h2>Staff (puerta)</h2>
+      <p>Prefijo <code>/api/staff</code>. Login simple, sin doble factor.</p>
+
+      <h3><span class="metodo post">POST</span> <code>/api/staff/login</code></h3>
+      <p>Login con la contraseña compartida. Rate limit: 10/5 minutos.</p>
+      <pre><code>{ "password": "…" }</code></pre>
+
+      <h3><span class="metodo post">POST</span> <code>/api/staff/verificar</code></h3>
+      <p>Valida el código de un QR y, si es válido, marca la entrada como usada.</p>
+      <pre><code>{ "token": "codigo-del-qr" }
+
+// resultados posibles:
+{ "resultado": "valida", "nombre": "Ada Lovelace", "disfrazado": true, "disfraz": "bruja", "deParteDe": "Maken" }
+{ "resultado": "ya_entro", "nombre": "…", "motivo": "Esta entrada ya se usó.", "entradoEn": "…" }
+{ "resultado": "invalida", "motivo": "QR no válido o no reconocido." }</code></pre>
+
+      <h3><span class="metodo post">POST</span> <code>/api/staff/logout</code> &nbsp; <span class="metodo get">GET</span> <code>/api/staff/sesion</code></h3>
+
+      <h2>Consulta de entrada (admin)</h2>
+      <h3><span class="metodo post">POST</span> <code>/api/entrada/verificar</code></h3>
+      <p>Consulta una entrada por su código <strong>sin marcarla</strong> como usada. Requiere sesión admin.</p>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

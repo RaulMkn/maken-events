@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modelo de datos · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html" class="activo">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Modelo de datos</h1>
+      <p class="lede">PostgreSQL, tres tablas. El esquema se crea y migra solo al arrancar (<code>initDb</code>).</p>
+
+      <div class="aviso">
+        <strong>Precios en céntimos.</strong> Todos los importes se guardan como enteros en
+        céntimos (700 = 7,00 €). El frontend los convierte a euros al mostrarlos.
+      </div>
+
+      <h2 style="border:none;padding-top:0;">Tabla <code>asistentes</code></h2>
+      <table>
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>TEXT</td><td>Clave primaria (nanoid).</td></tr>
+        <tr><td><code>nombre</code></td><td>TEXT</td><td>Obligatorio.</td></tr>
+        <tr><td><code>apellidos</code></td><td>TEXT</td><td>Opcional (nullable).</td></tr>
+        <tr><td><code>email</code></td><td>TEXT</td><td>Único.</td></tr>
+        <tr><td><code>disfrazado</code></td><td>BOOLEAN</td><td>Por defecto false.</td></tr>
+        <tr><td><code>disfraz</code></td><td>TEXT</td><td>Texto libre; null si no va disfrazado.</td></tr>
+        <tr><td><code>de_parte_de</code></td><td>TEXT</td><td>Quién le invita (fiesta cerrada).</td></tr>
+        <tr><td><code>estado_pago</code></td><td>TEXT</td><td><code>pendiente</code> | <code>pagado</code>.</td></tr>
+        <tr><td><code>precio_pagado_centimos</code></td><td>INTEGER</td><td>Precio fijado al confirmar el pago.</td></tr>
+        <tr><td><code>token_qr</code></td><td>TEXT</td><td>Código único del QR (índice único parcial). Null hasta confirmar.</td></tr>
+        <tr><td><code>email_enviado</code></td><td>BOOLEAN</td><td>Si se envió la entrada.</td></tr>
+        <tr><td><code>ha_entrado</code></td><td>BOOLEAN</td><td>Marcado al escanear en la puerta (un solo uso).</td></tr>
+        <tr><td><code>entrado_en</code></td><td>TIMESTAMPTZ</td><td>Momento de entrada.</td></tr>
+        <tr><td><code>creado_en</code></td><td>TIMESTAMPTZ</td><td>Fecha de registro.</td></tr>
+        <tr><td><code>pagado_en</code></td><td>TIMESTAMPTZ</td><td>Fecha de confirmación del pago.</td></tr>
+        <tr><td><code>acepto_condiciones_en</code></td><td>TIMESTAMPTZ</td><td>Constancia de aceptación de condiciones.</td></tr>
+      </table>
+      <p>Índices: por <code>email</code>, por <code>token_qr</code>, y un <strong>índice único parcial</strong>
+        sobre <code>token_qr</code> (permite varios NULL, garantiza códigos de QR únicos).</p>
+
+      <h2>Tabla <code>ajustes</code></h2>
+      <p>Pares clave/valor de configuración editable en caliente.</p>
+      <table>
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>clave</code></td><td>TEXT</td><td>Clave primaria. Ej: <code>precio_entrada_centimos</code>.</td></tr>
+        <tr><td><code>valor</code></td><td>TEXT</td><td>Valor como texto.</td></tr>
+      </table>
+      <p>Se inserta <code>precio_entrada_centimos = 700</code> por defecto si no existe.</p>
+
+      <h2>Tabla <code>gastos</code></h2>
+      <table>
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>TEXT</td><td>Clave primaria (nanoid).</td></tr>
+        <tr><td><code>concepto</code></td><td>TEXT</td><td>Descripción del gasto.</td></tr>
+        <tr><td><code>importe_centimos</code></td><td>INTEGER</td><td>Importe en céntimos.</td></tr>
+        <tr><td><code>creado_en</code></td><td>TIMESTAMPTZ</td><td>Fecha del gasto.</td></tr>
+      </table>
+
+      <h2>Cálculo de finanzas</h2>
+      <ul>
+        <li><strong>Ingresos</strong> = suma de <code>precio_pagado_centimos</code> de los asistentes con <code>estado_pago = 'pagado'</code>.</li>
+        <li><strong>Gastos</strong> = suma de <code>importe_centimos</code> de la tabla <code>gastos</code>.</li>
+        <li><strong>Beneficio</strong> = ingresos − gastos.</li>
+      </ul>
+      <p>Como cada asistente guarda el precio que pagó, cambiar el precio de entrada
+        más adelante <strong>no altera</strong> los ingresos ya registrados.</p>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>

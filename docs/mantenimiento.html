@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mantenimiento · maken-events</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="marca" href="index.html">
+        <svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a18"/><stop offset="1" stop-color="#ffa04d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#2a1245"/><path fill="url(#g)" d="M16 20h32a3 3 0 0 1 3 3v5a4 4 0 0 0 0 8v5a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-5a4 4 0 0 0 0-8v-5a3 3 0 0 1 3-3z"/><line x1="38" y1="21" x2="38" y2="43" stroke="#2a1245" stroke-width="2" stroke-dasharray="3 3"/></svg>
+        maken-events
+      </a>
+      <div class="version">Documentación · v1.0</div>
+      <nav>
+        <div class="nav-grupo"><h4>Introducción</h4>
+          <a href="index.html">Inicio</a>
+          <a href="arquitectura.html">Arquitectura</a>
+        </div>
+        <div class="nav-grupo"><h4>Guías de uso</h4>
+          <a href="guia-admin.html">Panel de administración</a>
+          <a href="guia-staff.html">Puerta (staff)</a>
+        </div>
+        <div class="nav-grupo"><h4>Referencia</h4>
+          <a href="api.html">API</a>
+          <a href="datos.html">Modelo de datos</a>
+          <a href="seguridad.html">Seguridad y RGPD</a>
+        </div>
+        <div class="nav-grupo"><h4>Operación</h4>
+          <a href="despliegue.html">Despliegue</a>
+          <a href="mantenimiento.html" class="activo">Mantenimiento</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+      <h1>Mantenimiento</h1>
+      <p class="lede">Copias de seguridad, réplica local y tareas habituales de operación.</p>
+
+      <h2 style="border:none;padding-top:0;">Copias de seguridad</h2>
+      <p>Estrategia recomendada, sobre todo antes del evento:</p>
+      <ul>
+        <li><strong>Backup de Heroku</strong> (captura y descarga bajo demanda):
+          <pre><code>heroku pg:backups:capture --app maken-events
+heroku pg:backups:download --app maken-events</code></pre>
+        </li>
+        <li><strong>Exportar CSV</strong> desde el panel admin: copia legible de la lista y respaldo de puerta.</li>
+        <li><strong>Réplica local</strong> en Docker (ver abajo): copia navegable completa.</li>
+      </ul>
+      <div class="aviso">
+        Haz un backup un par de días antes de la fiesta (cuando ya esté casi toda la gente
+        registrada) y otro la víspera.
+      </div>
+
+      <h2>Réplica local en Docker</h2>
+      <p>El script <code>scripts/replica-local.sh</code> descarga la base de datos de producción
+        y la restaura en una PostgreSQL local en Docker (no necesitas <code>pg_restore</code>
+        instalado: se ejecuta dentro del contenedor).</p>
+      <pre><code>./scripts/replica-local.sh</code></pre>
+      <p>Deja la copia accesible en:</p>
+      <pre><code>postgres://postgres:postgres@localhost:5433/fiesta</code></pre>
+      <p>Puedes lanzarlo tantas veces como quieras para refrescar la copia. Apaga el
+        contenedor con <code>docker stop fiesta-replica</code> (los datos se conservan).</p>
+      <div class="aviso peligro">
+        El fichero <code>.dump</code> descargado contiene datos personales. Guárdalo a buen
+        recaudo o bórralo. Está excluido del repositorio en <code>.gitignore</code>.
+      </div>
+
+      <h2>Limpiar datos de prueba</h2>
+      <ul>
+        <li><strong>Borrado individual</strong>: botón "Eliminar" de cada asistente en el panel.</li>
+        <li><strong>Reset completo</strong>: si reseteas la BD desde Heroku con la app corriendo,
+          reinicia el dyno para recrear las tablas:
+          <pre><code>heroku restart --app maken-events</code></pre>
+        </li>
+      </ul>
+
+      <h2>Prueba de humo</h2>
+      <p>Contra una instancia local en marcha, valida el flujo crítico
+        (registro → confirmar → QR → verificar → CSV):</p>
+      <pre><code>cd backend
+npm run smoke-test</code></pre>
+
+      <h2>Tareas frecuentes</h2>
+      <table>
+        <tr><th>Tarea</th><th>Cómo</th></tr>
+        <tr><td>Cambiar la contraseña del admin</td><td><code>npm run gen-admin -- "nueva"</code> y actualizar las config vars <code>ADMIN_PASSWORD_HASH</code> / <code>ADMIN_TOTP_SECRET</code>.</td></tr>
+        <tr><td>Cambiar la contraseña del staff</td><td><code>heroku config:set STAFF_PASSWORD="…"</code></td></tr>
+        <tr><td>Ver logs</td><td><code>heroku logs --tail --app maken-events</code></td></tr>
+        <tr><td>Reiniciar</td><td><code>heroku restart --app maken-events</code></td></tr>
+      </table>
+
+      <footer>maken-events · Documentación v1.0</footer>
+    </main>
+  </div>
+</body>
+</html>
