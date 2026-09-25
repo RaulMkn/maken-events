@@ -47,7 +47,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Entrada</div>
-              <div>8 € por persona (provisional)</div>
+              <div>7 € por persona </div>
             </div>
           </li>
           <li>
