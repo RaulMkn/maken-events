@@ -3,7 +3,7 @@
 Plataforma web para el registro de asistentes y la venta manual de entradas a
 eventos privados. En producción: **https://maken-events.app**
 
-> Versión 1.0 — **[Documentación completa (GitHub Pages)](https://raulmkn.github.io/maken-events/)**
+> Versión 1.0 — **[Documentación completa (GitHub Pages)](https://raulmkn.github.io/maken-events/docs/)**
 
 ---
 
@@ -154,7 +154,7 @@ Config vars necesarias: las de la tabla de arriba (mínimo `DATABASE_URL`,
 
 ## Documentación
 
-📖 **Sitio de documentación: https://raulmkn.github.io/maken-events/**
+📖 **Sitio de documentación: https://raulmkn.github.io/maken-events/docs/**
 
 La documentación completa (arquitectura, referencia de la API, modelo de datos,
 guías de administración y de puerta, despliegue y RGPD) está publicada en GitHub
@@ -162,16 +162,16 @@ Pages y su fuente vive en la carpeta [`docs/`](./docs).
 
 | Sección | Enlace |
 |---------|--------|
-| Arquitectura | https://raulmkn.github.io/maken-events/arquitectura.html |
+| Arquitectura | https://raulmkn.github.io/maken-events/docs/arquitectura.html |
 | Diagrama interactivo (Archify) | https://RaulMkn.github.io/maken-events/docs/arquitectura-diagrama.html |
-| Panel de administración | https://raulmkn.github.io/maken-events/guia-admin.html |
-| Puerta (staff) | https://raulmkn.github.io/maken-events/guia-staff.html |
-| Referencia de la API | https://raulmkn.github.io/maken-events/api.html |
-| Modelo de datos | https://raulmkn.github.io/maken-events/datos.html |
-| Seguridad y RGPD | https://raulmkn.github.io/maken-events/seguridad.html |
-| Despliegue | https://raulmkn.github.io/maken-events/despliegue.html |
-| Mantenimiento | https://raulmkn.github.io/maken-events/mantenimiento.html |
+| Panel de administración | https://raulmkn.github.io/maken-events/docs/guia-admin.html |
+| Puerta (staff) | https://raulmkn.github.io/maken-events/docs/guia-staff.html |
+| Referencia de la API | https://raulmkn.github.io/maken-events/docs/api.html |
+| Modelo de datos | https://raulmkn.github.io/maken-events/docs/datos.html |
+| Seguridad y RGPD | https://raulmkn.github.io/maken-events/docs/seguridad.html |
+| Despliegue | https://raulmkn.github.io/maken-events/docs/despliegue.html |
+| Mantenimiento | https://raulmkn.github.io/maken-events/docs/mantenimiento.html |
 
-> **Publicar el sitio** (una sola vez): en GitHub → Settings → Pages → Source:
-> *Deploy from a branch* → rama `main`, carpeta `/docs`. Estará disponible en
-> `https://raulmkn.github.io/maken-events/`.
+> **Publicar el sitio**: en GitHub → Settings → Pages → Source: *Deploy from a
+> branch* → rama `main`, carpeta `/ (root)`. La documentación queda bajo
+> `https://raulmkn.github.io/maken-events/docs/`.
