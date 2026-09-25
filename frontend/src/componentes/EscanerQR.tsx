@@ -10,11 +10,18 @@ import { verificarEntrada, logoutStaff, type ResultadoVerificacion } from '../ap
 export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
-  const procesandoRef = useRef(false);
+  // Verificación en curso (evita procesar dos lecturas a la vez).
+  const verificandoRef = useRef(false);
+  // Último código mostrado, para no reprocesar el mismo QR en bucle.
   const ultimoRef = useRef<string>('');
+  // Temporizador que oculta el resultado tras unos segundos.
+  const timerRef = useRef<number | null>(null);
 
   const [resultado, setResultado] = useState<ResultadoVerificacion | null>(null);
   const [errorCamara, setErrorCamara] = useState<string | null>(null);
+
+  // Cuánto tiempo permanece visible el resultado si no se escanea otro QR.
+  const DURACION_RESULTADO_MS = 10000;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -41,6 +48,7 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
     });
 
     return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
       scanner.stop();
       scanner.destroy();
       scannerRef.current = null;
@@ -49,27 +57,37 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   async function onDetectar(dato: string) {
-    // Evita reentradas y re-escaneos del mismo código seguidos.
-    if (procesandoRef.current) return;
+    // Ignora si ya hay una verificación en curso o si es el mismo QR que se
+    // está mostrando ahora mismo (evita reprocesar el mismo en bucle).
+    if (verificandoRef.current) return;
     if (dato === ultimoRef.current) return;
-    procesandoRef.current = true;
+
+    verificandoRef.current = true;
     ultimoRef.current = dato;
+
+    // Un escaneo nuevo sustituye al resultado anterior: cancelamos su timer.
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
 
     try {
       const res = await verificarEntrada(dato);
       setResultado(res);
-      // Vibración de feedback si el dispositivo lo soporta.
       if (navigator.vibrate) navigator.vibrate(res.resultado === 'valida' ? 120 : 300);
     } catch {
       setResultado({ resultado: 'invalida', motivo: 'Error de conexión al verificar.' });
+    } finally {
+      verificandoRef.current = false;
     }
 
-    // Tras mostrar el resultado, se limpia y se permite escanear de nuevo.
-    window.setTimeout(() => {
+    // El resultado se queda 10 s; si antes se escanea otro QR distinto, este
+    // timer se cancela arriba y se muestra el nuevo de inmediato.
+    timerRef.current = window.setTimeout(() => {
       setResultado(null);
       ultimoRef.current = '';
-      procesandoRef.current = false;
-    }, 3500);
+      timerRef.current = null;
+    }, DURACION_RESULTADO_MS);
   }
 
   async function cerrarSesion() {
