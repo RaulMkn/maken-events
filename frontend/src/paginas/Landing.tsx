@@ -29,7 +29,7 @@ export default function Landing() {
             </span>
             <div>
               <div className="info-dato">Cuándo</div>
-              <div>Viernes 31 de octubre · de 23:00 a 04:00</div>
+              <div>Sabado 31 de octubre · de 23:00 a 04:00</div>
             </div>
           </li>
           <li>
