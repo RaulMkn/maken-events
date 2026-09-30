@@ -128,7 +128,7 @@ El QR solo sirve una vez: al escanearlo queda usado.
 Espero un chupito de cortesia. — El equipo de Maken Events`;
 
   const resultado = await cliente.emails.send({
-    from: `${config.partyName} <${remitente}>`,
+    from: `Maken Events <${remitente}>`,
     to: datos.email,
     subject: asunto,
     html,

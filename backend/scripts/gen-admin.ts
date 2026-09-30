@@ -37,7 +37,7 @@ async function main(): Promise<void> {
   }
 
   const usuario = process.env.ADMIN_USER ?? 'admin';
-  const nombreApp = process.env.PARTY_NAME ?? 'Fiesta de Halloween';
+  const nombreApp = process.env.PARTY_NAME ?? 'Halloween 4.0';
 
   // Hash de la contraseña (parámetros por defecto de @node-rs/argon2 = argon2id).
   const passwordHashRaw = await hash(password);
