@@ -9,8 +9,8 @@
 import qrcode from 'qrcode';
 import { writeFileSync } from 'node:fs';
 
-const partyName = 'Fiesta de Halloween';
-const nombreCompleto = 'Ada Lovelace';
+const partyName = 'Halloween 4.0';
+const nombre = 'Ada';
 
 // QR de ejemplo (contenido cualquiera) como data URL para la vista previa.
 const qrDataUrl = await qrcode.toDataURL('ENTRADA-DE-EJEMPLO-PARA-PREVIEW', {
@@ -31,7 +31,7 @@ const html = `
           <tr>
             <td style="padding:36px 32px 8px 32px; text-align:center;">
               <div style="font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#ffa04d; font-family:Arial,Helvetica,sans-serif; font-weight:bold;">
-                Entrada confirmada
+                Maken Events te invita a
               </div>
               <h1 style="margin:12px 0 0 0; font-family:Georgia,'Times New Roman',serif; font-size:30px; color:#ff7a18;">
                 ${partyName}
@@ -40,8 +40,9 @@ const html = `
           </tr>
           <tr>
             <td style="padding:16px 32px 0 32px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.6; color:#f4eefb;">
-              <p style="margin:0 0 8px 0;">Hola <strong>${nombreCompleto}</strong>,</p>
-              <p style="margin:0; color:#b3a4cc;">Tu pago está confirmado. Esta es tu entrada: enséñala en la puerta.</p>
+              <p style="margin:0 0 12px 0;">¡Hola <strong>${nombre}</strong>! 👋</p>
+              <p style="margin:0 0 8px 0;">Ya está todo listo</p>
+              <p style="margin:0; color:#b3a4cc;">Aquí tienes tu entrada, enseñala en la puerta .</p>
             </td>
           </tr>
           <tr>
@@ -60,7 +61,7 @@ const html = `
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0710; border:1px solid #33254d; border-radius:12px;">
                 <tr>
                   <td style="padding:16px 18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.7;">
-                    <strong style="color:#ffa04d;">📅 Cuándo:</strong> Viernes 31 de octubre, de 22:00 a 04:00<br>
+                    <strong style="color:#ffa04d;">📅 Cuándo:</strong> Viernes 31 de octubre, de 23:00 a 04:00<br>
                     <strong style="color:#ffa04d;">📍 Dónde:</strong> C. Toledo, 36 · Local 5 · 28981 Parla (Madrid)
                   </td>
                 </tr>
@@ -69,10 +70,10 @@ const html = `
           </tr>
           <tr>
             <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
-              Guarda este correo. Tu entrada es personal e intransferible.<br>
+              Guarda este correo: tu entrada es personal e intransferible.<br>
               <strong style="color:#ffa04d;">El QR solo sirve una vez:</strong> al escanearlo en la puerta queda usado.<br>
-              Si tienes cualquier problema con tu entrada, habla con maken.<br>
-              Nos vemos en la noche más terrorífica del año. 🎃
+              ¿Alguna duda? Escríbenos, estamos para ayudarte.<br>
+              <span style="color:#8a7aa8;">Espero un chupito de cortesia. — El equipo de Maken Events 🖤</span>
             </td>
           </tr>
         </table>

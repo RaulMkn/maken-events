@@ -71,7 +71,7 @@ export const config = {
     from: optional('EMAIL_FROM', 'entradas@maken-events.app'),
   },
 
-  partyName: optional('PARTY_NAME', 'Fiesta de Halloween'),
+  partyName: optional('PARTY_NAME', 'Halloween 4.0'),
 } as const;
 
 export function assertAdminConfigured(): void {

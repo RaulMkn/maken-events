@@ -40,8 +40,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
     width: 360,
   });
 
-  const nombreCompleto = `${datos.nombre} ${datos.apellidos}`.trim();
-  const asunto = `🎟️ Tu entrada para ${config.partyName}`;
+  const asunto = `🎟️ Maken Events te invita a ${config.partyName}`;
   const remitente = config.email.from || 'entradas@maken-events.app';
 
   const html = `
@@ -58,7 +57,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
             <tr>
               <td style="padding:36px 32px 8px 32px; text-align:center;">
                 <div style="font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#ffa04d; font-family:Arial,Helvetica,sans-serif; font-weight:bold;">
-                  Entrada confirmada
+                  Maken Events te invita a
                 </div>
                 <h1 style="margin:12px 0 0 0; font-family:Georgia,'Times New Roman',serif; font-size:30px; color:#ff7a18;">
                   ${escaparHtml(config.partyName)}
@@ -68,8 +67,8 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
 
             <tr>
               <td style="padding:16px 32px 0 32px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.6; color:#f4eefb;">
-                <p style="margin:0 0 8px 0;">Hola <strong>${escaparHtml(nombreCompleto)}</strong>,</p>
-                <p style="margin:0; color:#b3a4cc;">Tu pago está confirmado. Esta es tu entrada: enséñala en la puerta.</p>
+                <p style="margin:0 0 12px 0;">Hellou hellou <strong>${escaparHtml(datos.nombre)}</strong></p>
+                <p style="margin:0; color:#b3a4cc;">El pago esta confirmado, aquí tienes tu entrada (enseñala en la puerta).</p>
               </td>
             </tr>
 
@@ -102,9 +101,9 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
 
             <tr>
               <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
-                Guarda este correo. Tu entrada es personal e intransferible.<br>
+                Guarda este correo: tu entrada es personal e intransferible.<br>
                 <strong style="color:#ffa04d;">El QR solo sirve una vez:</strong> al escanearlo en la puerta queda usado.<br>
-                Si tienes cualquier problema con tu entrada, habla con la organización.
+                <span style="color:#8a7aa8;">Espero un chupito de cortesia. — El equipo de Maken Events 🖤</span>
               </td>
             </tr>
           </table>
@@ -115,12 +114,18 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
   </html>
   `;
 
-  const texto = `Entrada confirmada para ${config.partyName}.
-Hola ${nombreCompleto}, tu pago está confirmado.
+  const texto = `Maken Events te invita a ${config.partyName}.
+
+Hellou hellou ${datos.nombre}
+El pago esta confirmado, aquí tienes tu entrada (enseñala en la puerta)
+
 Cuándo: viernes 31 de octubre, de 23:00 a 04:00.
 Dónde: C. Toledo, 36, Local 5, 28981 Parla (Madrid).
+
 Enseña el código QR adjunto en la puerta. Es personal e intransferible.
-El QR solo sirve una vez: al escanearlo queda usado. Ante cualquier problema, habla con la organización.`;
+El QR solo sirve una vez: al escanearlo queda usado.
+
+Espero un chupito de cortesia. — El equipo de Maken Events`;
 
   const resultado = await cliente.emails.send({
     from: `${config.partyName} <${remitente}>`,
