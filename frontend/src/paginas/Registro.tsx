@@ -51,10 +51,8 @@ export default function Registro() {
       return;
     }
 
-    if (disfrazado && disfraz.trim().length === 0) {
-      setError('Indica de qué vas a ir disfrazado/a.');
-      return;
-    }
+    // El disfraz es opcional: si va disfrazado/a pero no quiere decir de qué
+    // (para mantener la sorpresa), lo dejamos en blanco sin bloquear.
 
     // Mostramos las condiciones y exigimos leerlas (scroll hasta el final)
     // antes de poder aceptar.
@@ -260,7 +258,10 @@ export default function Registro() {
 
         {disfrazado && (
           <div className="campo">
-            <label htmlFor="disfraz">¿De qué te disfrazas?</label>
+            <label htmlFor="disfraz">
+              ¿De qué te disfrazas?{' '}
+              <span style={{ color: 'var(--texto-tenue)', fontWeight: 400 }}>(opcional)</span>
+            </label>
             <input
               id="disfraz"
               type="text"
@@ -269,6 +270,9 @@ export default function Registro() {
               maxLength={200}
               placeholder="Ej. vampiro, bruja, esqueleto…"
             />
+            <p className="subtitulo" style={{ fontSize: '0.8rem', marginTop: 6 }}>
+              Déjalo en blanco si prefieres que tu disfraz sea una sorpresa. 🎭
+            </p>
           </div>
         )}
 

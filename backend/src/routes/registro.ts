@@ -53,7 +53,9 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
       const apellidos = limpiarTexto(request.body.apellidos ?? '');
       const email = normalizarEmail(request.body.email);
       const disfrazado = request.body.disfrazado;
-      const disfraz = disfrazado ? limpiarTexto(request.body.disfraz ?? '') : null;
+      // Si va disfrazado/a pero no indica de qué (sorpresa), guardamos null.
+      const disfrazTexto = disfrazado ? limpiarTexto(request.body.disfraz ?? '') : '';
+      const disfraz = disfrazTexto.length > 0 ? disfrazTexto : null;
       const deParteDe = limpiarTexto(request.body.deParteDe);
 
       if (!emailValido(email)) {
@@ -66,11 +68,8 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Indica de parte de quién vienes.' });
       }
 
-      if (disfrazado && (!disfraz || disfraz.length === 0)) {
-        return reply
-          .status(400)
-          .send({ error: 'Indica de qué vas disfrazado/a.' });
-      }
+      // El disfraz es opcional aunque vaya disfrazado/a: puede dejarlo en
+      // blanco para mantener la sorpresa. No se bloquea el registro.
 
       // Redundante con el esquema (const: true), pero explícito por seguridad.
       if (request.body.aceptaCondiciones !== true) {
