@@ -17,6 +17,7 @@ export interface Asistente {
   haEntrado: boolean;
   creadoEn: string;
   pagadoEn: string | null;
+  validadoLista: boolean;
 }
 
 export interface ResumenAsistentes {
@@ -25,6 +26,7 @@ export interface ResumenAsistentes {
   pendientes: number;
   disfrazados: number;
   entrados: number;
+  validados: number;
 }
 
 export interface DatosRegistro {
@@ -52,8 +54,10 @@ export interface Finanzas {
 }
 
 export interface Invitado {
+  id: string;
   nombre: string;
   deParteDe: string | null;
+  validado: boolean;
 }
 
 export interface ResultadoVerificacion {
@@ -202,6 +206,16 @@ export function verificarEntrada(token: string): Promise<ResultadoVerificacion> 
 
 export function listarInvitados(): Promise<{ total: number; invitados: Invitado[] }> {
   return request('/api/staff/invitados');
+}
+
+export function validarInvitado(
+  id: string,
+  validado: boolean,
+): Promise<{ ok: true; id: string; validado: boolean }> {
+  return request('/api/staff/invitados/validar', {
+    method: 'POST',
+    body: JSON.stringify({ id, validado }),
+  });
 }
 
 export { ApiError };

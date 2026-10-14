@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/halloween/registro" element={<Registro />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/staff" element={<Staff />} />
-        <Route path="/invitados" element={<Invitados />} />
+        <Route path="/halloween/invitados" element={<Invitados />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

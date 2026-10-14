@@ -195,6 +195,10 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
             <div className="metrica-numero">{resumen.disfrazados}</div>
             <div className="metrica-etiqueta">Disfrazados</div>
           </div>
+          <div className="metrica">
+            <div className="metrica-numero">{resumen.validados}</div>
+            <div className="metrica-etiqueta">Validados</div>
+          </div>
         </div>
       )}
 
@@ -223,6 +227,7 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Disfraz</th>
+                    <th>Confianza</th>
                     <th>Pago</th>
                     <th>Email</th>
                     <th>Entrada</th>
@@ -237,6 +242,13 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
                       </td>
                       <td>{a.email}</td>
                       <td>{a.disfrazado ? (a.disfraz ?? 'Sí') : '—'}</td>
+                      <td>
+                        {a.validadoLista ? (
+                          <span className="etiqueta etiqueta-pagado">✅ Validado</span>
+                        ) : (
+                          <span className="etiqueta etiqueta-pendiente">Sin validar</span>
+                        )}
+                      </td>
                       <td>
                         <span className={`etiqueta etiqueta-${a.estadoPago}`}>
                           {a.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}

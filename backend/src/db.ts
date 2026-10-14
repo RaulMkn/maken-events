@@ -37,7 +37,8 @@ export async function initDb(): Promise<void> {
       acepto_condiciones_en TIMESTAMPTZ,
       de_parte_de   TEXT,
       ha_entrado    BOOLEAN NOT NULL DEFAULT false,
-      entrado_en    TIMESTAMPTZ
+      entrado_en    TIMESTAMPTZ,
+      validado_lista BOOLEAN NOT NULL DEFAULT false
     );
 
     CREATE INDEX IF NOT EXISTS idx_asistentes_email ON asistentes (email);
@@ -67,6 +68,11 @@ export async function initDb(): Promise<void> {
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS entrado_en TIMESTAMPTZ;`);
   // Precio realmente pagado por el asistente (en céntimos), fijado al confirmar.
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS precio_pagado_centimos INTEGER;`);
+  // Validación "en lista": alguien de confianza confirma que esta persona es
+  // de fiar (va de parte de alguien conocido). Lo marca el equipo en la puerta.
+  await pool.query(
+    `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS validado_lista BOOLEAN NOT NULL DEFAULT false;`,
+  );
   // Índice único parcial: garantiza que no haya dos entradas con el mismo
   // código de QR (permite varios NULL, para los aún no confirmados).
   await pool.query(
@@ -132,4 +138,5 @@ export interface AsistenteRow {
   ha_entrado: boolean;
   entrado_en: string | null;
   precio_pagado_centimos: number | null;
+  validado_lista: boolean;
 }

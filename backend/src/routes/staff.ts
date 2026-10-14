@@ -59,24 +59,61 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
   app.get('/sesion', { preHandler: protegerStaff }, async () => ({ autenticado: true }));
 
   // ---- Lista de validación en puerta ----
-  // Devuelve SOLO nombre y de parte de quién: lo justo para validar en la
-  // entrada quién puede pasar y quién no. Nada de email, pago ni datos extra.
+  // Devuelve SOLO id, nombre, de parte de quién y si está validado "en lista".
+  // Lo justo para repasar quién puede pasar y marcarlo. Nada de email ni pago.
   app.get('/invitados', { preHandler: protegerStaff }, async () => {
     const { rows } = await pool.query<{
+      id: string;
       nombre: string;
       apellidos: string | null;
       de_parte_de: string | null;
+      validado_lista: boolean;
     }>(
-      'SELECT nombre, apellidos, de_parte_de FROM asistentes ORDER BY de_parte_de NULLS LAST, nombre',
+      `SELECT id, nombre, apellidos, de_parte_de, validado_lista
+       FROM asistentes ORDER BY de_parte_de NULLS LAST, nombre`,
     );
 
     const invitados = rows.map((r) => ({
+      id: r.id,
       nombre: `${r.nombre} ${r.apellidos ?? ''}`.trim(),
       deParteDe: r.de_parte_de,
+      validado: r.validado_lista,
     }));
 
     return { total: invitados.length, invitados };
   });
+
+  // ---- Marcar/desmarcar a un invitado como validado "en lista" ----
+  // Lo usa la gente de confianza para confirmar a los suyos. Es genérico: no
+  // guardamos quién valida, solo si está validado o no.
+  app.post<{ Body: { id: string; validado: boolean } }>(
+    '/invitados/validar',
+    {
+      preHandler: protegerStaff,
+      schema: {
+        body: {
+          type: 'object',
+          required: ['id', 'validado'],
+          additionalProperties: false,
+          properties: {
+            id: { type: 'string', minLength: 1, maxLength: 40 },
+            validado: { type: 'boolean' },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id, validado } = request.body;
+      const res = await pool.query(
+        'UPDATE asistentes SET validado_lista = $1 WHERE id = $2',
+        [validado, id],
+      );
+      if (res.rowCount === 0) {
+        return reply.status(404).send({ error: 'Invitado no encontrado.' });
+      }
+      return reply.send({ ok: true, id, validado });
+    },
+  );
 
   // ---- Verificación del QR en la puerta ----
   app.post<{ Body: { token: string } }>(

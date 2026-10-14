@@ -32,6 +32,7 @@ interface AsistenteDTO {
   creadoEn: string;
   pagadoEn: string | null;
   precioPagadoCentimos: number | null;
+  validadoLista: boolean;
 }
 
 function aDTO(row: AsistenteRow): AsistenteDTO {
@@ -49,6 +50,7 @@ function aDTO(row: AsistenteRow): AsistenteDTO {
     creadoEn: row.creado_en,
     pagadoEn: row.pagado_en,
     precioPagadoCentimos: row.precio_pagado_centimos,
+    validadoLista: row.validado_lista,
   };
 }
 
@@ -69,6 +71,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       pendientes: asistentes.filter((a) => a.estadoPago === 'pendiente').length,
       disfrazados: asistentes.filter((a) => a.disfrazado).length,
       entrados: asistentes.filter((a) => a.haEntrado).length,
+      validados: asistentes.filter((a) => a.validadoLista).length,
     };
 
     return { resumen, asistentes };
@@ -91,6 +94,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       'Precio pagado (EUR)',
       'Email enviado',
       'Ha entrado',
+      'Validado en lista',
       'Creado en',
       'Pagado en',
     ];
@@ -107,6 +111,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
         r.precio_pagado_centimos != null ? (r.precio_pagado_centimos / 100).toFixed(2) : '',
         r.email_enviado ? 'Sí' : 'No',
         r.ha_entrado ? 'Sí' : 'No',
+        r.validado_lista ? 'Sí' : 'No',
         r.creado_en ?? '',
         r.pagado_en ?? '',
       ]

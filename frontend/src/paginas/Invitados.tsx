@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   comprobarSesionStaff,
   listarInvitados,
+  validarInvitado,
   logoutStaff,
   ApiError,
   type Invitado,
@@ -48,6 +49,7 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
+  const [guardando, setGuardando] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -73,6 +75,30 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
   async function cerrarSesion() {
     await logoutStaff().catch(() => undefined);
     onLogout();
+  }
+
+  async function alternarValidado(inv: Invitado) {
+    const nuevoValor = !inv.validado;
+    setGuardando(inv.id);
+    setError(null);
+    // Optimista: actualizamos la UI y revertimos si falla.
+    setInvitados((prev) =>
+      prev.map((i) => (i.id === inv.id ? { ...i, validado: nuevoValor } : i)),
+    );
+    try {
+      await validarInvitado(inv.id, nuevoValor);
+    } catch (err) {
+      setInvitados((prev) =>
+        prev.map((i) => (i.id === inv.id ? { ...i, validado: inv.validado } : i)),
+      );
+      if (err instanceof ApiError && err.status === 401) {
+        onLogout();
+        return;
+      }
+      setError('No se pudo guardar la validación. Inténtalo de nuevo.');
+    } finally {
+      setGuardando(null);
+    }
   }
 
   // Filtro por nombre o por de parte de quién. Insensible a acentos/mayúsculas.
@@ -133,13 +159,14 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
       ) : filtrados.length === 0 ? (
         <p className="subtitulo">Nadie coincide con «{busqueda}».</p>
       ) : (
-        grupos.map((grupo) => (
+        grupos.map((grupo) => {
+          const validados = grupo.elementos.filter((i) => i.validado).length;
+          return (
           <div key={grupo.nombre}>
             <div className="grupo-titulo">
               <span className="grupo-nombre">De parte de {grupo.nombre}</span>
               <span className="grupo-conteo">
-                {grupo.elementos.length}{' '}
-                {grupo.elementos.length === 1 ? 'persona' : 'personas'}
+                {validados}/{grupo.elementos.length} validados
               </span>
             </div>
             <div className="tabla-wrap">
@@ -148,20 +175,39 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
                   <tr>
                     <th>Nombre</th>
                     <th>De parte de</th>
+                    <th>Validado</th>
+                    <th>Acción</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {grupo.elementos.map((inv, idx) => (
-                    <tr key={`${inv.nombre}-${idx}`}>
+                  {grupo.elementos.map((inv) => (
+                    <tr key={inv.id}>
                       <td>{inv.nombre}</td>
                       <td>{inv.deParteDe?.trim() || '—'}</td>
+                      <td>{inv.validado ? '✅ Sí' : '—'}</td>
+                      <td>
+                        <button
+                          className={`boton boton-pequeno ${
+                            inv.validado ? 'boton-secundario' : ''
+                          }`}
+                          onClick={() => alternarValidado(inv)}
+                          disabled={guardando === inv.id}
+                        >
+                          {guardando === inv.id
+                            ? '…'
+                            : inv.validado
+                              ? 'Quitar'
+                              : 'Validar'}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-        ))
+          );
+        })
       )}
     </div>
   );
