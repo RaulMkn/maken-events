@@ -20,7 +20,7 @@ export default function Registro() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
-  // Aviso (no bloqueo) de que ya se hizo un registro desde este navegador.
+  // Aviso (no bloqueo) ya se hizo un registro desde este navegador.
   const [yaRegistradoAqui, setYaRegistradoAqui] = useState(false);
 
   useEffect(() => {

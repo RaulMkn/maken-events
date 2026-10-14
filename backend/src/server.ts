@@ -3,6 +3,7 @@ import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
+import multipart from '@fastify/multipart';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -13,6 +14,7 @@ import { authRoutes } from './routes/auth.js';
 import { adminRoutes } from './routes/admin.js';
 import { entradaRoutes } from './routes/entrada.js';
 import { staffRoutes } from './routes/staff.js';
+import { carreteRoutes } from './routes/carrete.js';
 
 const app = Fastify({
   logger: {
@@ -75,6 +77,15 @@ await app.register(rateLimit, {
   ban: 3,
 });
 
+// Subida de ficheros (fotos del carrete). Las imágenes ya van comprimidas
+// desde el cliente; 12 MB de margen cubre fotos grandes sin comprimir.
+await app.register(multipart, {
+  limits: {
+    fileSize: 12 * 1024 * 1024,
+    files: 1,
+  },
+});
+
 // ---- Salud ----
 app.get('/api/health', async () => ({ ok: true }));
 
@@ -84,6 +95,7 @@ await app.register(authRoutes, { prefix: '/api/admin' });
 await app.register(adminRoutes, { prefix: '/api/admin' });
 await app.register(entradaRoutes, { prefix: '/api' });
 await app.register(staffRoutes, { prefix: '/api/staff' });
+await app.register(carreteRoutes, { prefix: '/api' });
 
 // ---- Frontend estático (SPA de React) ----
 // El build del frontend se copia a backend/public durante el build de Heroku.

@@ -833,3 +833,41 @@ tr:last-child td {
   gap: 6px;
   flex-wrap: wrap;
 }
+
+/* ---- Carrete de fotos del invitado ---- */
+.carrete-contador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 18px 0 6px;
+}
+
+.carrete-numero {
+  font-size: 3.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--naranja);
+}
+
+.carrete-de {
+  font-size: 0.9rem;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.carrete-galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.carrete-galeria img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde);
+}

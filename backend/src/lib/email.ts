@@ -15,6 +15,8 @@ interface DatosEntrada {
   apellidos: string;
   email: string;
   tokenQr: string;
+  /** Token del carrete de fotos (para construir el enlace personal). */
+  tokenCarrete?: string | null;
 }
 
 let resend: Resend | null = null;
@@ -42,6 +44,32 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
 
   const asunto = `🎟️ Maken Events te invita a ${config.partyName}`;
   const remitente = config.email.from || 'entradas@maken-events.app';
+
+  // Enlace personal al carrete de fotos (si el asistente tiene token).
+  const urlCarrete = datos.tokenCarrete
+    ? `${config.appUrl}/halloween/carrete/${datos.tokenCarrete}`
+    : null;
+
+  // Bloque HTML del carrete, solo si hay enlace.
+  const bloqueCarrete = urlCarrete
+    ? `
+            <tr>
+              <td style="padding:16px 32px 0 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1c1033; border:1px solid #4a2f7a; border-radius:12px;">
+                  <tr>
+                    <td style="padding:18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.6; text-align:center;">
+                      <div style="font-size:22px; margin-bottom:6px;">📸</div>
+                      <strong style="color:#ffa04d;">Tu carrete de la noche</strong><br>
+                      <span style="color:#b3a4cc;">Tienes ${config.maxFotosCarrete} fotos para inmortalizar la fiesta. Se guardan automáticamente.</span>
+                      <div style="margin-top:14px;">
+                        <a href="${urlCarrete}" style="display:inline-block; background:#ff7a18; color:#1a0e00; text-decoration:none; font-weight:bold; padding:11px 22px; border-radius:999px;">Abrir mi carrete</a>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>`
+    : '';
 
   const html = `
   <!doctype html>
@@ -98,7 +126,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
                 </table>
               </td>
             </tr>
-
+${bloqueCarrete}
             <tr>
               <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
                 Guarda este correo: tu entrada es personal e intransferible.<br>
@@ -124,7 +152,7 @@ Dónde: C. Toledo, 36, Local 5, 28981 Parla (Madrid).
 
 Enseña el código QR adjunto en la puerta. Es personal e intransferible.
 El QR solo sirve una vez: al escanearlo queda usado.
-
+${urlCarrete ? `\nTu carrete de fotos (${config.maxFotosCarrete} fotos para la noche): ${urlCarrete}\n` : ''}
 Espero un chupito de cortesia. — El equipo de Maken Events`;
 
   const resultado = await cliente.emails.send({

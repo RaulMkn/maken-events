@@ -218,4 +218,41 @@ export function validarInvitado(
   });
 }
 
+// ---- Carrete de fotos (público, por token) ----
+export interface EstadoCarrete {
+  nombre: string;
+  usadas: number;
+  maximo: number;
+  almacenamientoListo: boolean;
+}
+
+export function estadoCarrete(token: string): Promise<EstadoCarrete> {
+  return request(`/api/carrete/${encodeURIComponent(token)}`);
+}
+
+/**
+ * Sube una foto (Blob/File ya comprimido) al carrete. Usa multipart, por eso
+ * no pasa por el helper `request` (que es solo para JSON).
+ */
+export async function subirFotoCarrete(
+  token: string,
+  foto: Blob,
+): Promise<{ ok: true; usadas: number; maximo: number }> {
+  const form = new FormData();
+  form.append('foto', foto, 'foto.jpg');
+
+  const res = await fetch(`/api/carrete/${encodeURIComponent(token)}/foto`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body: form,
+  });
+
+  const texto = await res.text();
+  const data = texto ? JSON.parse(texto) : null;
+  if (!res.ok) {
+    throw new ApiError(res.status, data?.error ?? 'No se pudo subir la foto.');
+  }
+  return data;
+}
+
 export { ApiError };

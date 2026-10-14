@@ -72,7 +72,31 @@ export const config = {
   },
 
   partyName: optional('PARTY_NAME', 'Halloween 4.0'),
+
+  // URL pública de la app, para construir enlaces absolutos en los emails
+  // (p. ej. el enlace al carrete de fotos). Sin barra final.
+  appUrl: optional('APP_URL', 'https://maken-events.app').replace(/\/+$/, ''),
+
+  // Appwrite Storage: destino de las fotos de los carretes de los invitados.
+  // Si no está configurado, la función de subida devuelve un error claro y
+  // el resto de la app sigue funcionando con normalidad.
+  appwrite: {
+    endpoint: optional('APPWRITE_ENDPOINT', 'https://cloud.appwrite.io/v1'),
+    projectId: optional('APPWRITE_PROJECT_ID'),
+    apiKey: optional('APPWRITE_API_KEY'),
+    bucketId: optional('APPWRITE_BUCKET_ID'),
+  },
+
+  // Nº máximo de fotos por carrete de invitado.
+  maxFotosCarrete: Number(process.env.MAX_FOTOS_CARRETE ?? 10),
 } as const;
+
+/** ¿Está Appwrite Storage configurado y listo para subir? */
+export function almacenamientoConfigurado(): boolean {
+  return Boolean(
+    config.appwrite.projectId && config.appwrite.apiKey && config.appwrite.bucketId,
+  );
+}
 
 export function assertAdminConfigured(): void {
   if (!config.admin.passwordHash || !config.admin.totpSecret) {

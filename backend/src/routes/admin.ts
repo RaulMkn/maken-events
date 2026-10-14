@@ -164,6 +164,9 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       // y se lee bien desde la pantalla de un móvil. La validez se comprueba
       // buscando este código en la BD (no hace falta que sea un JWT).
       const tokenQr = nanoid(16);
+      // Token del carrete de fotos: largo (difícil de adivinar) porque la URL
+      // va en el email y no hay login. Reutilizamos el existente si ya lo tenía.
+      const tokenCarrete = row.token_carrete ?? nanoid(21);
       const pagadoEn = new Date().toISOString();
       // Guardamos el precio vigente en este momento: cada asistente "vale" lo
       // que pagó, aunque el precio del evento cambie después.
@@ -171,9 +174,10 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
 
       await pool.query(
         `UPDATE asistentes
-         SET estado_pago = 'pagado', token_qr = $1, pagado_en = $2, precio_pagado_centimos = $3
-         WHERE id = $4`,
-        [tokenQr, pagadoEn, precio, row.id],
+         SET estado_pago = 'pagado', token_qr = $1, pagado_en = $2,
+             precio_pagado_centimos = $3, token_carrete = $4
+         WHERE id = $5`,
+        [tokenQr, pagadoEn, precio, tokenCarrete, row.id],
       );
 
       // Enviamos el email con el QR. Si falla el envío, el pago queda confirmado
@@ -184,6 +188,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           apellidos: row.apellidos ?? '',
           email: row.email,
           tokenQr,
+          tokenCarrete,
         });
         await pool.query('UPDATE asistentes SET email_enviado = true WHERE id = $1', [row.id]);
         request.log.info({ asistenteId: row.id }, 'Pago confirmado y email enviado');
@@ -240,6 +245,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           apellidos: row.apellidos ?? '',
           email: row.email,
           tokenQr: row.token_qr,
+          tokenCarrete: row.token_carrete,
         });
         await pool.query('UPDATE asistentes SET email_enviado = true WHERE id = $1', [row.id]);
         return reply.send({ ok: true, emailEnviado: true });

@@ -38,7 +38,9 @@ export async function initDb(): Promise<void> {
       de_parte_de   TEXT,
       ha_entrado    BOOLEAN NOT NULL DEFAULT false,
       entrado_en    TIMESTAMPTZ,
-      validado_lista BOOLEAN NOT NULL DEFAULT false
+      validado_lista BOOLEAN NOT NULL DEFAULT false,
+      token_carrete TEXT,
+      fotos_carrete INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE INDEX IF NOT EXISTS idx_asistentes_email ON asistentes (email);
@@ -72,6 +74,16 @@ export async function initDb(): Promise<void> {
   // de fiar (va de parte de alguien conocido). Lo marca el equipo en la puerta.
   await pool.query(
     `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS validado_lista BOOLEAN NOT NULL DEFAULT false;`,
+  );
+  // Carrete de fotos: token personal (en el email) y contador de fotos subidas.
+  await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS token_carrete TEXT;`);
+  await pool.query(
+    `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS fotos_carrete INTEGER NOT NULL DEFAULT 0;`,
+  );
+  // Índice único parcial para buscar rápido por token de carrete (permite NULL).
+  await pool.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS uniq_asistentes_token_carrete
+     ON asistentes (token_carrete) WHERE token_carrete IS NOT NULL;`,
   );
   // Índice único parcial: garantiza que no haya dos entradas con el mismo
   // código de QR (permite varios NULL, para los aún no confirmados).
@@ -139,4 +151,6 @@ export interface AsistenteRow {
   entrado_en: string | null;
   precio_pagado_centimos: number | null;
   validado_lista: boolean;
+  token_carrete: string | null;
+  fotos_carrete: number;
 }
