@@ -43,6 +43,9 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
         usadas: row.fotos_carrete,
         maximo: config.maxFotosCarrete,
         almacenamientoListo: almacenamientoConfigurado(),
+        // El carrete solo se activa cuando la persona ya ha entrado a la
+        // fiesta (su QR fue validado en la puerta).
+        haEntrado: row.ha_entrado,
       });
     },
   );
@@ -68,6 +71,13 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
       const row = rows[0];
       if (!row) {
         return reply.status(404).send({ error: 'Carrete no encontrado.' });
+      }
+
+      // El carrete se desbloquea al entrar a la fiesta (QR validado en puerta).
+      if (!row.ha_entrado) {
+        return reply.status(403).send({
+          error: 'Tu carrete se activa cuando entres a la fiesta y validemos tu QR en la puerta.',
+        });
       }
 
       if (row.fotos_carrete >= config.maxFotosCarrete) {

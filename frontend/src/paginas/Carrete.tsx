@@ -102,6 +102,7 @@ export default function Carrete() {
 
   const restantes = estado ? Math.max(estado.maximo - estado.usadas, 0) : 0;
   const agotado = restantes === 0;
+  const bloqueado = !!estado && !estado.haEntrado;
 
   return (
     <div className="tema-halloween">
@@ -128,49 +129,66 @@ export default function Carrete() {
             </div>
           )}
 
-          {estado && !estado.almacenamientoListo && (
-            <div className="aviso aviso-warn">
-              El carrete aún no está activo. Vuelve a intentarlo un poco más tarde.
+          {bloqueado ? (
+            <div className="centrado" style={{ padding: '18px 0 4px' }}>
+              <span role="img" aria-label="candado" style={{ fontSize: '2.6rem', display: 'block' }}>
+                🔒
+              </span>
+              <p className="mt" style={{ fontWeight: 600 }}>
+                Tu carrete todavía no está activo
+              </p>
+              <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 6 }}>
+                Se desbloquea cuando entres a la fiesta y validemos tu QR en la puerta.
+                Vuelve a abrir este enlace una vez dentro. 🎃
+              </p>
             </div>
-          )}
+          ) : (
+            <>
+              {estado && !estado.almacenamientoListo && (
+                <div className="aviso aviso-warn">
+                  El carrete aún no está activo. Vuelve a intentarlo un poco más tarde.
+                </div>
+              )}
 
-          <div className="carrete-contador">
-            <span className="carrete-numero">{restantes}</span>
-            <span className="carrete-de">
-              {restantes === 1 ? 'foto restante' : 'fotos restantes'} de {estado?.maximo}
-            </span>
-          </div>
+              <div className="carrete-contador">
+                <span className="carrete-numero">{restantes}</span>
+                <span className="carrete-de">
+                  {restantes === 1 ? 'foto restante' : 'fotos restantes'} de {estado?.maximo}
+                </span>
+              </div>
 
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={onElegirFoto}
-            style={{ display: 'none' }}
-          />
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={onElegirFoto}
+                style={{ display: 'none' }}
+              />
 
-          <button
-            type="button"
-            className="boton boton-bloque mt"
-            onClick={() => inputRef.current?.click()}
-            disabled={subiendo || agotado || !estado?.almacenamientoListo}
-          >
-            {subiendo ? 'Subiendo…' : agotado ? 'Carrete completo 🎉' : 'Hacer / elegir foto'}
-          </button>
+              <button
+                type="button"
+                className="boton boton-bloque mt"
+                onClick={() => inputRef.current?.click()}
+                disabled={subiendo || agotado || !estado?.almacenamientoListo}
+              >
+                {subiendo ? 'Subiendo…' : agotado ? 'Carrete completo 🎉' : 'Hacer / elegir foto'}
+              </button>
 
-          {agotado && (
-            <p className="subtitulo centrado mt" style={{ fontSize: '0.9rem' }}>
-              Has usado tus {estado?.maximo} fotos. ¡Gracias por inmortalizar la fiesta! 🖤
-            </p>
-          )}
+              {agotado && (
+                <p className="subtitulo centrado mt" style={{ fontSize: '0.9rem' }}>
+                  Has usado tus {estado?.maximo} fotos. ¡Gracias por inmortalizar la fiesta! 🖤
+                </p>
+              )}
 
-          {miniaturas.length > 0 && (
-            <div className="carrete-galeria">
-              {miniaturas.map((url, i) => (
-                <img key={url} src={url} alt={`Foto ${miniaturas.length - i}`} />
-              ))}
-            </div>
+              {miniaturas.length > 0 && (
+                <div className="carrete-galeria">
+                  {miniaturas.map((url, i) => (
+                    <img key={url} src={url} alt={`Foto ${miniaturas.length - i}`} />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

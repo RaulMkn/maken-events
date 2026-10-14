@@ -224,6 +224,7 @@ export interface EstadoCarrete {
   usadas: number;
   maximo: number;
   almacenamientoListo: boolean;
+  haEntrado: boolean;
 }
 
 export function estadoCarrete(token: string): Promise<EstadoCarrete> {
