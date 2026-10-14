@@ -688,6 +688,27 @@ tr:last-child td {
   cursor: pointer;
 }
 
+.buscador-invitados {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde-claro);
+  background: rgba(10, 7, 16, 0.6);
+  color: var(--texto);
+  font-size: 0.95rem;
+  font-family: var(--fuente-texto);
+}
+
+.buscador-invitados::placeholder {
+  color: var(--texto-tenue);
+}
+
+.buscador-invitados:focus {
+  outline: none;
+  border-color: var(--naranja);
+}
+
 .tabs {
   display: inline-flex;
   gap: 4px;

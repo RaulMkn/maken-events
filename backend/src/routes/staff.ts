@@ -58,6 +58,26 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/sesion', { preHandler: protegerStaff }, async () => ({ autenticado: true }));
 
+  // ---- Lista de validación en puerta ----
+  // Devuelve SOLO nombre y de parte de quién: lo justo para validar en la
+  // entrada quién puede pasar y quién no. Nada de email, pago ni datos extra.
+  app.get('/invitados', { preHandler: protegerStaff }, async () => {
+    const { rows } = await pool.query<{
+      nombre: string;
+      apellidos: string | null;
+      de_parte_de: string | null;
+    }>(
+      'SELECT nombre, apellidos, de_parte_de FROM asistentes ORDER BY de_parte_de NULLS LAST, nombre',
+    );
+
+    const invitados = rows.map((r) => ({
+      nombre: `${r.nombre} ${r.apellidos ?? ''}`.trim(),
+      deParteDe: r.de_parte_de,
+    }));
+
+    return { total: invitados.length, invitados };
+  });
+
   // ---- Verificación del QR en la puerta ----
   app.post<{ Body: { token: string } }>(
     '/verificar',

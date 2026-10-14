@@ -51,6 +51,11 @@ export interface Finanzas {
   precioEntradaCentimos: number;
 }
 
+export interface Invitado {
+  nombre: string;
+  deParteDe: string | null;
+}
+
 export interface ResultadoVerificacion {
   resultado: 'valida' | 'ya_entro' | 'invalida';
   nombre?: string;
@@ -193,6 +198,10 @@ export function verificarEntrada(token: string): Promise<ResultadoVerificacion> 
     method: 'POST',
     body: JSON.stringify({ token }),
   });
+}
+
+export function listarInvitados(): Promise<{ total: number; invitados: Invitado[] }> {
+  return request('/api/staff/invitados');
 }
 
 export { ApiError };

@@ -10,6 +10,7 @@ import {
   type ResumenAsistentes,
 } from '../api.ts';
 import DashboardFinanzas from './DashboardFinanzas.tsx';
+import { agruparPorParteInteligente } from '../utils/agruparParte.ts';
 
 type Pestana = 'asistentes' | 'finanzas';
 
@@ -205,10 +206,12 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
       ) : asistentes.length === 0 ? (
         <p className="subtitulo">Todavía no hay nadie registrado.</p>
       ) : (
-        agruparPorParte(asistentes).map(([grupo, lista]) => (
-          <div key={grupo}>
+        agruparPorParteInteligente(asistentes, (a) => a.deParteDe).map((grupo) => {
+          const lista = grupo.elementos;
+          return (
+          <div key={grupo.nombre}>
             <div className="grupo-titulo">
-              <span className="grupo-nombre">De parte de {grupo}</span>
+              <span className="grupo-nombre">De parte de {grupo.nombre}</span>
               <span className="grupo-conteo">
                 {lista.length} {lista.length === 1 ? 'persona' : 'personas'}
               </span>
@@ -276,25 +279,11 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
               </table>
             </div>
           </div>
-        ))
+          );
+        })
       )}
         </>
       )}
     </div>
   );
-}
-
-/**
- * Agrupa los asistentes por "de parte de quién", ordenando los grupos
- * alfabéticamente. Los que no tengan valor se agrupan bajo "Sin especificar".
- */
-function agruparPorParte(asistentes: Asistente[]): [string, Asistente[]][] {
-  const grupos = new Map<string, Asistente[]>();
-  for (const a of asistentes) {
-    const clave = (a.deParteDe ?? '').trim() || 'Sin especificar';
-    const lista = grupos.get(clave) ?? [];
-    lista.push(a);
-    grupos.set(clave, lista);
-  }
-  return [...grupos.entries()].sort((x, y) => x[0].localeCompare(y[0], 'es'));
 }
