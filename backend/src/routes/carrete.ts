@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { pool, type AsistenteRow } from '../db.js';
 import { config, almacenamientoConfigurado } from '../config.js';
-import { subirFoto } from '../lib/almacenamiento.js';
+import { subirFoto, listarFotos, obtenerFoto } from '../lib/almacenamiento.js';
 
 /**
  * Carrete de fotos de los invitados.
@@ -137,6 +137,66 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
         usadas: numeroFoto,
         maximo: config.maxFotosCarrete,
       });
+    },
+  );
+
+  // ---- Galería compartida de la fiesta ----
+  // Protegida por un token (va en el email). Devuelve los IDs de las fotos;
+  // cada imagen se sirve por el endpoint de abajo (el backend hace de proxy,
+  // así la API key de Appwrite nunca llega al cliente).
+  app.get<{ Querystring: { token?: string } }>('/galeria', async (request, reply) => {
+    if (!config.galeriaToken || request.query.token !== config.galeriaToken) {
+      return reply.status(401).send({ error: 'No autorizado.' });
+    }
+    if (!almacenamientoConfigurado()) {
+      return reply.status(503).send({ error: 'La galería no está disponible todavía.' });
+    }
+    try {
+      const fotos = await listarFotos(100);
+      return reply.send({
+        total: fotos.length,
+        fotos: fotos.map((f) => ({
+          id: f.fileId,
+          url: `/api/galeria/foto/${f.fileId}?token=${encodeURIComponent(config.galeriaToken)}`,
+        })),
+      });
+    } catch (err) {
+      request.log.error(
+        { motivo: err instanceof Error ? err.message : 'desconocido' },
+        'Falló el listado de la galería',
+      );
+      return reply.status(502).send({ error: 'No se pudo cargar la galería.' });
+    }
+  });
+
+  // ---- Servir una foto concreta de la galería ----
+  app.get<{ Params: { fileId: string }; Querystring: { token?: string } }>(
+    '/galeria/foto/:fileId',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['fileId'],
+          properties: { fileId: { type: 'string', minLength: 1, maxLength: 64 } },
+        },
+      },
+    },
+    async (request, reply) => {
+      if (!config.galeriaToken || request.query.token !== config.galeriaToken) {
+        return reply.status(401).send({ error: 'No autorizado.' });
+      }
+      if (!almacenamientoConfigurado()) {
+        return reply.status(503).send({ error: 'La galería no está disponible todavía.' });
+      }
+      try {
+        const buffer = await obtenerFoto(request.params.fileId);
+        return reply
+          .header('Content-Type', 'image/jpeg')
+          .header('Cache-Control', 'private, max-age=3600')
+          .send(buffer);
+      } catch {
+        return reply.status(404).send({ error: 'Foto no encontrada.' });
+      }
     },
   );
 }

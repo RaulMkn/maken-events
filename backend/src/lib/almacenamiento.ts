@@ -47,3 +47,29 @@ export async function subirFoto(buffer: Buffer, nombre: string): Promise<FotoSub
   const creado = await s.createFile(config.appwrite.bucketId, ID.unique(), archivo);
   return { fileId: creado.$id };
 }
+
+export interface FotoListada {
+  fileId: string;
+  creadoEn: string;
+}
+
+/**
+ * Lista las fotos del bucket, de la más reciente a la más antigua.
+ * Requiere que la API key tenga scope de lectura (files.read).
+ */
+export async function listarFotos(limite = 100): Promise<FotoListada[]> {
+  const s = getStorage();
+  // Query en formato del SDK: orden descendente por fecha de creación.
+  const res = await s.listFiles(config.appwrite.bucketId, [
+    `limit(${Math.max(1, Math.min(limite, 100))})`,
+    'orderDesc("$createdAt")',
+  ]);
+  return res.files.map((f) => ({ fileId: f.$id, creadoEn: f.$createdAt }));
+}
+
+/** Descarga el contenido binario de una foto (para servirla desde el backend). */
+export async function obtenerFoto(fileId: string): Promise<Buffer> {
+  const s = getStorage();
+  const datos = await s.getFileView(config.appwrite.bucketId, fileId);
+  return Buffer.from(datos);
+}

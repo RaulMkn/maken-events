@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { login, ApiError } from '../api.ts';
+import { IconoCandado } from './Iconos.tsx';
 
 /**
  * Login del admin: usuario + contraseña + código TOTP (MFA en un solo paso).
@@ -31,13 +32,8 @@ export default function LoginAdmin({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="contenedor" style={{ maxWidth: 420 }}>
       <header className="centrado aparece" style={{ margin: '48px 0 28px' }}>
-        <span role="img" aria-label="candado" style={{ fontSize: '3rem', display: 'block' }}>
-          🔒
-        </span>
-        <span className="eyebrow" style={{ display: 'block', marginTop: 14 }}>
-          Zona privada
-        </span>
-        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)' }}>Panel de control</h1>
+        <span className="icono-destacado"><IconoCandado /></span>
+        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', marginTop: 10 }}>Panel de control</h1>
         <p className="subtitulo" style={{ marginTop: 8 }}>
           Necesitas tu contraseña y el código de tu app.
         </p>

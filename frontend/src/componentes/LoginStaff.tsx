@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { loginStaff, ApiError } from '../api.ts';
+import { IconoCandado } from './Iconos.tsx';
 
 /**
  * Login del staff de puerta: solo una contraseña compartida (sin MFA).
@@ -25,13 +26,8 @@ export default function LoginStaff({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="contenedor" style={{ maxWidth: 400 }}>
       <header className="centrado aparece" style={{ margin: '48px 0 28px' }}>
-        <span role="img" aria-label="linterna" style={{ fontSize: '3rem', display: 'block' }}>
-          🔦
-        </span>
-        <span className="eyebrow" style={{ display: 'block', marginTop: 14 }}>
-          Equipo de puerta
-        </span>
-        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)' }}>Control de acceso</h1>
+        <span className="icono-destacado"><IconoCandado /></span>
+        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', marginTop: 10 }}>Control de acceso</h1>
         <p className="subtitulo" style={{ marginTop: 8 }}>
           Introduce la contraseña del staff para escanear entradas.
         </p>

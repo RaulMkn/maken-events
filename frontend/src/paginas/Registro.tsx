@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { registrar, ApiError } from '../api.ts';
 import { condicionesHtml, condicionesHtmlScrollable } from '../condiciones.ts';
+import { IconoFantasma } from '../componentes/Iconos.tsx';
 
 /**
  * Formulario de registro. Antes de enviar, se muestran las condiciones de
@@ -137,10 +138,8 @@ export default function Registro() {
       <div className="tema-halloween">
       <div className="contenedor">
         <div className="tarjeta centrado aparece">
-          <span role="img" aria-label="fantasma" style={{ fontSize: '3.5rem', display: 'block' }}>
-            👻
-          </span>
-          <h1 className="titulo-fiesta" style={{ marginTop: 8, fontSize: 'clamp(1.8rem, 5vw, 2.6rem)' }}>
+          <span className="icono-destacado"><IconoFantasma /></span>
+          <h1 className="titulo-fiesta" style={{ marginTop: 12, fontSize: 'clamp(1.8rem, 5vw, 2.6rem)' }}>
             ¡Ya estás dentro!
           </h1>
           <p className="aviso aviso-ok mt" style={{ textAlign: 'left' }}>
@@ -159,14 +158,14 @@ export default function Registro() {
     <div className="tema-halloween">
     <div className="contenedor">
       <header style={{ marginBottom: 28 }} className="aparece">
-        <Link to="/halloween" className="subtitulo" style={{ fontSize: '0.95rem' }}>
-          ← Volver al evento
+        <Link to="/halloween" className="volver-link">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+          </svg>
+          Volver al evento
         </Link>
-        <span className="eyebrow" style={{ display: 'block', marginTop: 18 }}>
+        <h1 className="titulo-fiesta" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginTop: 20 }}>
           Reserva tu sitio
-        </span>
-        <h1 className="titulo-fiesta" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)' }}>
-          Registro
         </h1>
         <p className="subtitulo" style={{ marginTop: 10 }}>
           Rellena tus datos y guarda tu entrada para la noche.
@@ -301,7 +300,6 @@ export default function Registro() {
           style={{
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid var(--borde)',
-            borderLeft: '3px solid var(--borde-claro)',
             color: 'var(--texto-tenue)',
             fontSize: '0.8rem',
             marginTop: 4,

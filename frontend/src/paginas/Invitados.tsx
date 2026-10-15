@@ -120,7 +120,6 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
     <div className="contenedor-ancho">
       <div className="cabecera">
         <div>
-          <span className="eyebrow">Equipo de puerta</span>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}>Lista de invitados</h1>
           <p className="subtitulo" style={{ marginTop: 8 }}>
             Nombre y de parte de quién viene cada persona. Agrupados por quien invita.

@@ -20,7 +20,12 @@ de principio a fin, sin pasarela de pago (el pago se confirma a mano):
   asistentes agrupada, confirmación de pago (que genera la entrada con QR y la
   envía por email), y un panel de finanzas (precio, gastos, beneficio).
 - **Panel de staff** (con contraseña simple): lector de QR por cámara para
-  validar entradas en la puerta. Cada QR sirve **una sola vez**.
+  validar entradas en la puerta. Cada QR sirve **una sola vez**. Incluye una
+  **lista de invitados** (solo nombre y de parte de quién) para repasar y
+  marcar como "de confianza" a cada persona.
+- **Carrete de fotos por invitado**: al confirmar el pago, el email incluye un
+  enlace personal a un carrete de 10 fotos. Se desbloquea cuando la persona
+  entra a la fiesta (QR validado) y las fotos se guardan en Appwrite Storage.
 
 ## Funcionalidades
 
@@ -30,9 +35,19 @@ de principio a fin, sin pasarela de pago (el pago se confirma a mano):
 - Confirmación de pago manual → genera un QR único y envía la entrada por email.
 - Reenvío de entradas y eliminación de asistentes desde el panel.
 - Escáner de QR en la puerta que marca la entrada como usada (un solo uso).
+- Lista de invitados para la puerta con **agrupación inteligente** por quien
+  invita: une variantes del mismo nombre (mayúsculas/minúsculas, un solo
+  apellido, solo el nombre…) y permite marcar personas como validadas.
+- **Carrete de fotos** personal (10 por invitado) con enlace en el email,
+  desbloqueo tras validar el QR, compresión de imágenes en cliente y
+  almacenamiento en Appwrite.
+- El disfraz es opcional: se puede dejar en blanco para mantener la sorpresa.
+- **Galería compartida** de la noche (acceso por token del email) y **cuenta
+  atrás** en la landing. El email incluye además un **.ics** para añadir la
+  fiesta al calendario y, si se configura, un enlace a la **playlist** de Spotify.
 - Dashboard financiero: precio de entrada configurable, gastos, ingresos
   (por lo realmente pagado por cada asistente) y beneficio neto.
-- Exportación de la lista de asistentes a CSV.
+- Exportación de la lista de asistentes a CSV (incluye estado de validación).
 
 ## Stack
 
@@ -43,6 +58,7 @@ de principio a fin, sin pasarela de pago (el pago se confirma a mano):
 | Frontend    | React 19, Vite, TypeScript, React Router |
 | Email       | Resend (dominio propio verificado con SPF/DKIM) |
 | QR          | `qrcode` (generación) y `qr-scanner` (lectura por cámara) |
+| Fotos       | Appwrite Storage (`node-appwrite`) + subida multipart (`@fastify/multipart`) |
 | Seguridad   | argon2 (contraseña admin), TOTP (otplib), JWT en cookie |
 | Despliegue  | Heroku (buildpack de Node) + Heroku Postgres |
 
@@ -60,15 +76,16 @@ maken-events/
 │   │   ├── server.ts     arranque de Fastify, seguridad, rutas, estáticos
 │   │   ├── config.ts     configuración desde variables de entorno
 │   │   ├── db.ts         conexión, esquema y migraciones de PostgreSQL
-│   │   ├── routes/       registro, auth, admin, staff, entrada
-│   │   └── lib/          auth, sesión, protección de rutas, email, validación
-│   └── scripts/          gen-admin, smoke-test, preview-email
+│   │   ├── routes/       registro, auth, admin, staff, entrada, carrete
+│   │   └── lib/          auth, sesión, protección de rutas, email, validación, almacenamiento
+│   └── scripts/          gen-admin, smoke-test, preview-email, test-appwrite
 └── frontend/
     ├── src/
     │   ├── main.tsx       router
     │   ├── api.ts         cliente HTTP
-    │   ├── paginas/       Eventos, Landing, Registro, Admin, Staff
-    │   └── componentes/   LoginAdmin, PanelAdmin, DashboardFinanzas, LoginStaff, EscanerQR
+    │   ├── paginas/       Eventos, Landing, Registro, Admin, Staff, Invitados, Carrete, Galeria
+    │   ├── componentes/   LoginAdmin, PanelAdmin, DashboardFinanzas, LoginStaff, EscanerQR, CuentaAtras
+    │   └── utils/         agruparParte, comprimirImagen, fiesta (fecha)
     ├── public/            favicon, imagen social
     └── index.html
 ```
@@ -78,6 +95,7 @@ maken-events/
 - Node.js 22.x
 - Una base de datos PostgreSQL (local, en Docker, o Heroku Postgres)
 - Cuenta de Resend con un dominio verificado (para enviar emails)
+- Proyecto de Appwrite con un bucket de Storage (para el carrete de fotos)
 
 ## Desarrollo local
 
@@ -99,6 +117,11 @@ npm install
 npm run dev        # http://localhost:5173 (proxya /api al backend)
 ```
 
+El registro, el pago y la entrada por QR funcionan sin configuración extra. El
+**carrete** y la **galería** solo se activan si defines las variables de
+Appwrite (`APPWRITE_*`) y `GALERIA_TOKEN`; si no, el resto de la app funciona
+igual y esas funciones muestran un aviso de "no disponible".
+
 ## Variables de entorno
 
 Ver `.env.example`. En producción se configuran como *config vars* de Heroku,
@@ -118,6 +141,14 @@ no en un fichero `.env`.
 | `RESEND_API_KEY` | API key de Resend |
 | `EMAIL_FROM` | Remitente (una dirección del dominio verificado) |
 | `PARTY_NAME` | Nombre del evento para asuntos y plantillas |
+| `APP_URL` | URL pública de la app (para enlaces absolutos en emails, p. ej. el carrete) |
+| `APPWRITE_ENDPOINT` | Endpoint de Appwrite (por defecto `https://cloud.appwrite.io/v1`) |
+| `APPWRITE_PROJECT_ID` | ID del proyecto de Appwrite |
+| `APPWRITE_API_KEY` | API key de Appwrite con scope `files.write` (y `files.read` para la galería) |
+| `APPWRITE_BUCKET_ID` | ID del bucket de Storage donde se guardan las fotos |
+| `MAX_FOTOS_CARRETE` | Nº máximo de fotos por invitado (por defecto 10) |
+| `SPOTIFY_PLAYLIST_URL` | Enlace a la playlist colaborativa (se incluye en el email, opcional) |
+| `GALERIA_TOKEN` | Token de acceso a la galería compartida (va en el email; vacío = galería deshabilitada) |
 
 ## Scripts
 

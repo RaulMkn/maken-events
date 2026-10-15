@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import QrScanner from 'qr-scanner';
 import { verificarEntrada, logoutStaff, type ResultadoVerificacion } from '../api.ts';
+import { IconoCheck, IconoAviso, IconoProhibido } from './Iconos.tsx';
 
 /**
  * Lector de QR para la puerta. Usa la cámara del dispositivo (trasera si hay).
@@ -107,7 +108,6 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
     <div className="contenedor" style={{ maxWidth: 460 }}>
       <div className="cabecera">
         <div>
-          <span className="eyebrow">Puerta</span>
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>Escanear entradas</h1>
         </div>
         <button className="boton boton-secundario boton-pequeno" onClick={cerrarSesion}>
@@ -130,9 +130,7 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
         <div className={`resultado-scan resultado-scan--${resultado.resultado} mt`}>
           {resultado.resultado === 'valida' && (
             <>
-              <span className="resultado-icono" role="img" aria-label="ok">
-                ✅
-              </span>
+              <span className="resultado-icono"><IconoCheck /></span>
               <div className="resultado-nombre">{resultado.nombre}</div>
               <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 6 }}>
                 {resultado.disfrazado ? `Disfraz: ${resultado.disfraz ?? 'sí'}` : 'Sin disfraz'}
@@ -146,9 +144,7 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
 
           {resultado.resultado === 'ya_entro' && (
             <>
-              <span className="resultado-icono" role="img" aria-label="atención">
-                ⚠️
-              </span>
+              <span className="resultado-icono"><IconoAviso /></span>
               <div className="resultado-nombre">{resultado.nombre ?? 'Entrada usada'}</div>
               <p style={{ color: 'var(--amarillo)', fontWeight: 700, marginTop: 8 }}>
                 Esta entrada YA se usó.
@@ -158,9 +154,7 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
 
           {resultado.resultado === 'invalida' && (
             <>
-              <span className="resultado-icono" role="img" aria-label="no válida">
-                ⛔
-              </span>
+              <span className="resultado-icono"><IconoProhibido /></span>
               <div className="resultado-nombre">Entrada no válida</div>
               <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 6 }}>
                 {resultado.motivo}

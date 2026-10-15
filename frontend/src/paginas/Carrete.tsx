@@ -7,6 +7,7 @@ import {
   type EstadoCarrete,
 } from '../api.ts';
 import { comprimirImagen } from '../utils/comprimirImagen.ts';
+import { IconoCamara, IconoCandado, IconoFantasma } from '../componentes/Iconos.tsx';
 
 /**
  * Carrete de fotos del invitado. Acceso por token (sin login). Permite hacer
@@ -85,10 +86,8 @@ export default function Carrete() {
       <div className="tema-halloween">
         <div className="contenedor">
           <div className="tarjeta centrado aparece">
-            <span role="img" aria-label="fantasma" style={{ fontSize: '3.5rem', display: 'block' }}>
-              👻
-            </span>
-            <h1 className="titulo-fiesta" style={{ marginTop: 8, fontSize: 'clamp(1.6rem, 5vw, 2.2rem)' }}>
+            <span className="icono-destacado"><IconoFantasma /></span>
+            <h1 className="titulo-fiesta" style={{ marginTop: 12, fontSize: 'clamp(1.6rem, 5vw, 2.2rem)' }}>
               Carrete no encontrado
             </h1>
             <p className="subtitulo mt">
@@ -108,13 +107,8 @@ export default function Carrete() {
     <div className="tema-halloween">
       <div className="contenedor" style={{ maxWidth: 560 }}>
         <header className="centrado aparece" style={{ margin: '36px 0 20px' }}>
-          <span role="img" aria-label="cámara" style={{ fontSize: '3rem', display: 'block' }}>
-            📸
-          </span>
-          <span className="eyebrow" style={{ display: 'block', marginTop: 12 }}>
-            Carrete de la noche
-          </span>
-          <h1 className="titulo-fiesta" style={{ fontSize: 'clamp(1.8rem, 5vw, 2.6rem)' }}>
+          <span className="icono-destacado"><IconoCamara /></span>
+          <h1 className="titulo-fiesta" style={{ marginTop: 10, fontSize: 'clamp(1.8rem, 5vw, 2.6rem)' }}>
             {estado?.nombre ? `Fotos de ${estado.nombre}` : 'Tu carrete'}
           </h1>
           <p className="subtitulo" style={{ marginTop: 8 }}>
@@ -131,15 +125,14 @@ export default function Carrete() {
 
           {bloqueado ? (
             <div className="centrado" style={{ padding: '18px 0 4px' }}>
-              <span role="img" aria-label="candado" style={{ fontSize: '2.6rem', display: 'block' }}>
-                🔒
+              <span className="icono-destacado" style={{ color: 'var(--texto-tenue)' }}>
+                <IconoCandado />
               </span>
               <p className="mt" style={{ fontWeight: 600 }}>
                 Tu carrete todavía no está activo
               </p>
               <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 6 }}>
                 Se desbloquea cuando entres a la fiesta y validemos tu QR en la puerta.
-                Vuelve a abrir este enlace una vez dentro. 🎃
               </p>
             </div>
           ) : (
@@ -172,12 +165,12 @@ export default function Carrete() {
                 onClick={() => inputRef.current?.click()}
                 disabled={subiendo || agotado || !estado?.almacenamientoListo}
               >
-                {subiendo ? 'Subiendo…' : agotado ? 'Carrete completo 🎉' : 'Hacer / elegir foto'}
+                {subiendo ? 'Subiendo…' : agotado ? 'Carrete completo' : 'Hacer o elegir foto'}
               </button>
 
               {agotado && (
                 <p className="subtitulo centrado mt" style={{ fontSize: '0.9rem' }}>
-                  Has usado tus {estado?.maximo} fotos. ¡Gracias por inmortalizar la fiesta! 🖤
+                  Has usado tus {estado?.maximo} fotos. Gracias por inmortalizar la fiesta.
                 </p>
               )}
 

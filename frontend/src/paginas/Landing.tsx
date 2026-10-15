@@ -1,4 +1,12 @@
 import { Link } from 'react-router-dom';
+import CuentaAtras from '../componentes/CuentaAtras.tsx';
+import { INICIO_FIESTA } from '../utils/fiesta.ts';
+import {
+  IconoCalendario,
+  IconoUbicacion,
+  IconoEntrada,
+  IconoCopa,
+} from '../componentes/Iconos.tsx';
 
 /**
  * Página de inicio: hero + información de la fiesta + concurso + registro.
@@ -8,52 +16,49 @@ export default function Landing() {
     <div className="tema-halloween">
     <div className="contenedor">
       <header className="centrado aparece" style={{ marginBottom: 40 }}>
-        <Link to="/" className="subtitulo" style={{ fontSize: '0.9rem', display: 'inline-block', marginBottom: 16 }}>
-          ← Todos los eventos
+        <Link to="/" className="volver-link">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+          </svg>
+          Todos los eventos
         </Link>
-        <br />
-        <span className="eyebrow">31 de octubre · Parla</span>
-        <h1 className="titulo-fiesta">
+        <h1 className="titulo-fiesta" style={{ marginTop: 22 }}>
           Noche de
           <br />
           Halloween
         </h1>
+        <p className="subtitulo" style={{ marginTop: 14 }}>
+          31 de octubre · Parla
+        </p>
+        <CuentaAtras objetivo={INICIO_FIESTA} />
       </header>
 
       <section className="tarjeta aparece" style={{ animationDelay: '0.08s' }}>
         <h2>Info</h2>
         <ul className="info-lista">
           <li>
-            <span className="icono" role="img" aria-label="calendario">
-              🗓️
-            </span>
+            <span className="icono"><IconoCalendario /></span>
             <div>
               <div className="info-dato">Cuándo</div>
-              <div>Sabado 31 de octubre · de 23:00 a 04:00</div>
+              <div>Sábado 31 de octubre · de 23:00 a 04:00</div>
             </div>
           </li>
           <li>
-            <span className="icono" role="img" aria-label="ubicación">
-              📍
-            </span>
+            <span className="icono"><IconoUbicacion /></span>
             <div>
               <div className="info-dato">Dónde</div>
               <div>Parla (Madrid) · La dirección exacta llega con la entrada.</div>
             </div>
           </li>
           <li>
-            <span className="icono" role="img" aria-label="entrada">
-              🎟️
-            </span>
+            <span className="icono"><IconoEntrada /></span>
             <div>
               <div className="info-dato">Entrada</div>
-              <div>7 € por persona </div>
+              <div>7 € por persona</div>
             </div>
           </li>
           <li>
-            <span className="icono" role="img" aria-label="bebida">
-              🍹
-            </span>
+            <span className="icono"><IconoCopa /></span>
             <div>
               <div className="info-dato">Bebida</div>
               <div>Trae tu propio alcohol. En el local habrá hielo y vasos</div>
@@ -64,40 +69,33 @@ export default function Landing() {
 
       <section className="tarjeta aparece" style={{ marginTop: 20, animationDelay: '0.16s' }}>
         <h2>
-          Concurso de disfraces <span className="acento-creepy" style={{ color: 'var(--lima)' }}>¡vístete!</span>
+          Concurso de disfraces <span className="acento-creepy">¡vístete!</span>
         </h2>
         <p className="subtitulo" style={{ fontSize: '1rem' }}>
           Un jurado elige a los tres mejores disfraces de la noche
         </p>
         <div className="premios">
           <div className="premio">
-            <span className="premio-medalla" role="img" aria-label="primer puesto">
-              🥇
-            </span>
+            <span className="premio-puesto premio-puesto--1">1</span>
             <div>
               <strong>Primer puesto</strong> — elige el premio que quiera entre los tres.
             </div>
           </div>
           <div className="premio">
-            <span className="premio-medalla" role="img" aria-label="segundo puesto">
-              🥈
-            </span>
+            <span className="premio-puesto premio-puesto--2">2</span>
             <div>
               <strong>Segundo puesto</strong> — se lleva uno de los dos que queden.
             </div>
           </div>
           <div className="premio">
-            <span className="premio-medalla" role="img" aria-label="tercer puesto">
-              🥉
-            </span>
+            <span className="premio-puesto premio-puesto--3">3</span>
             <div>
               <strong>Tercer puesto</strong> — se queda con el premio restante.
             </div>
           </div>
         </div>
         <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 16 }}>
-          {/* PLACEHOLDER: especificar cuáles son los 3 premios */}
-          Los premios se desvelan pronto pero obvio habra Jagger
+          Los premios se desvelan pronto, pero obvio habrá Jagger.
         </p>
       </section>
 
@@ -111,6 +109,12 @@ export default function Landing() {
           Solo para mayores de 18.
         </p>
       </div>
+
+      <footer className="landing-pie">
+        <Link to="/staff" className="landing-pie-link">
+          Acceso del equipo de puerta
+        </Link>
+      </footer>
     </div>
     </div>
   );

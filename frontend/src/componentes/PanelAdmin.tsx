@@ -117,7 +117,6 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
     <div className="contenedor-ancho">
       <div className="cabecera">
         <div>
-          <span className="eyebrow">Panel de control</span>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}>Administración</h1>
         </div>
         <button className="boton boton-secundario boton-pequeno" onClick={cerrarSesion}>

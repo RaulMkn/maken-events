@@ -1,31 +1,77 @@
-/* Tipografías: Cinzel Decorative (titulares con carácter gótico/ritual),
-   Creepster (acento puntual de Halloween) y Fraunces/Inter para texto. */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Creepster&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+/* Tipografías del nuevo mundo "invitación clandestina":
+   - Cinzel Decorative: titulares, carácter ritual/grabado.
+   - Creepster: acento puntual, muy medido.
+   - Spectral: cuerpo serif con alma (reemplaza a Fraunces, sobreexpuesta).
+   - IBM Plex Sans: etiquetas, datos y UI (reemplaza a Inter). */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Creepster&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --naranja: #ff7a18;
-  --naranja-claro: #ffa04d;
-  --calabaza: #e8580c;
-  --morado: #7b2ff7;
-  --morado-oscuro: #2a1245;
-  --lima: #9ef01a;
-  --negro: #0a0710;
-  --negro-suave: #150e22;
-  --panel: #1b1330;
-  --texto: #f4eefb;
-  --texto-tenue: #b3a4cc;
-  --verde: #4ade80;
-  --rojo: #ff5470;
-  --amarillo: #ffd60a;
-  --borde: #33254d;
-  --borde-claro: #4a3670;
-  --radio: 16px;
-  --radio-sm: 10px;
-  --sombra: 0 20px 60px -20px rgba(0, 0, 0, 0.7);
-  --sombra-naranja: 0 12px 40px -12px rgba(255, 122, 24, 0.5);
+  /* Acento principal: ámbar tóxico, usado con disciplina (no todo degradado). */
+  --ambar: #f4a613;
+  --ambar-claro: #ffc24d;
+  --veneno: #86b817;        /* verde ácido, acento secundario escaso */
+  --sangre: #c0392b;        /* rojo profundo para peligro/eliminar */
+  --morado: #6d3bd4;
+  --morado-oscuro: #241038;
+
+  /* Fondos: tinta púrpura casi negra, no el negro-naranja de supermercado. */
+  --negro: #080611;
+  --negro-suave: #0f0b1c;
+  --panel: #150f28;
+
+  --texto: #efeafc;
+  --texto-tenue: #a99fc4;
+
+  --verde: #5bbf7b;
+  --rojo: #e06074;
+  --amarillo: #e8b63a;
+
+  --borde: #2a2140;
+  --borde-claro: #3d3159;
+
+  --radio: 14px;
+  --radio-sm: 9px;
+
+  --sombra: 0 24px 70px -28px rgba(0, 0, 0, 0.85);
+  --sombra-acento: 0 14px 44px -16px rgba(244, 166, 19, 0.42);
+
   --fuente-display: 'Cinzel Decorative', 'Georgia', serif;
-  --fuente-texto: 'Inter', system-ui, sans-serif;
-  --fuente-serif: 'Fraunces', 'Georgia', serif;
+  --fuente-texto: 'IBM Plex Sans', system-ui, sans-serif;
+  --fuente-serif: 'Spectral', 'Georgia', serif;
+
+  /* Alias de compatibilidad: el acento del tema es ámbar, no naranja. */
+  --naranja: var(--ambar);
+  --naranja-claro: var(--ambar-claro);
+  --calabaza: #d98712;
+  --lima: var(--veneno);
+}
+
+/* Superficies del navegador tematizadas (no defaults del sistema). */
+html {
+  scrollbar-color: var(--borde-claro) transparent;
+  caret-color: var(--ambar);
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--borde-claro);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--morado);
+  background-clip: padding-box;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ambar);
+  outline-offset: 2px;
 }
 
 * {
@@ -44,20 +90,19 @@ body {
   color: var(--texto);
   min-height: 100vh;
   line-height: 1.6;
-  /* Tema neutro por defecto (home de eventos): azulado sobrio, sin Halloween. */
-  background-color: #0b0d14;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  /* Home de eventos: tinta sobria con una leve niebla fría, sin Halloween. */
+  background-color: #0a0914;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(90, 110, 160, 0.18), transparent 60%),
-    radial-gradient(circle at 85% 90%, rgba(90, 110, 160, 0.08), transparent 40%),
-    radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 22px 22px;
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(109, 59, 212, 0.14), transparent 62%),
+    radial-gradient(ellipse 50% 40% at 90% 110%, rgba(109, 59, 212, 0.08), transparent 55%);
   background-attachment: fixed;
 }
 
-/* Tema del evento Halloween: se aplica en el <div> raíz de sus páginas.
-   Reintroduce la paleta cálida y el fondo con halos de calabaza y morado. */
+/* Tema del evento Halloween: niebla púrpura con un halo ámbar contenido y un
+   grano de ruido muy sutil. Nada de arcoíris de gradientes. */
 .tema-halloween {
-  --naranja-claro: #ffa04d;
   position: relative;
 }
 
@@ -68,22 +113,30 @@ body {
   z-index: -1;
   background-color: var(--negro);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123, 47, 247, 0.28), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 15%, rgba(255, 122, 24, 0.2), transparent 55%),
-    radial-gradient(circle at 15% 85%, rgba(158, 240, 26, 0.07), transparent 40%),
-    radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 22px 22px;
+    radial-gradient(ellipse 85% 50% at 50% -12%, rgba(109, 59, 212, 0.24), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 88% 8%, rgba(244, 166, 19, 0.1), transparent 58%);
+}
+
+/* Grano de película: textura orgánica sobre la niebla, muy tenue. */
+.tema-halloween::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.035;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 a {
-  color: var(--naranja-claro);
+  color: var(--ambar-claro);
   text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
 ::selection {
-  background: var(--naranja);
-  color: #1a0e00;
+  background: var(--ambar);
+  color: #150e00;
 }
 
 /* ---- Contenedores ---- */
@@ -100,39 +153,34 @@ a {
 }
 
 /* ---- Tarjetas ---- */
+/* Sin franja de acento lateral/superior: la profundidad viene de un reflejo
+   interior sutil arriba y la sombra proyectada, como papel grueso. */
 .tarjeta {
   position: relative;
-  background: linear-gradient(160deg, var(--panel), var(--negro-suave));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 120px),
+    linear-gradient(160deg, var(--panel), var(--negro-suave));
   border: 1px solid var(--borde);
   border-radius: var(--radio);
   padding: 32px;
-  box-shadow: var(--sombra);
-}
-
-/* Filo superior de color en las tarjetas, detalle sutil de "hecho a mano". */
-.tarjeta::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  border-radius: var(--radio) var(--radio) 0 0;
-  background: linear-gradient(90deg, var(--calabaza), var(--naranja), var(--amarillo));
-  opacity: 0.8;
+  box-shadow: var(--sombra), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* ---- Tipografía ---- */
 h1 {
   font-family: var(--fuente-display);
   font-weight: 900;
-  font-size: clamp(2.2rem, 6vw, 3.6rem);
-  line-height: 1.05;
-  letter-spacing: 0.01em;
+  font-size: clamp(2rem, 8.5vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 h2 {
   font-family: var(--fuente-serif);
   font-weight: 600;
-  font-size: 1.5rem;
+  font-size: 1.55rem;
   margin-bottom: 18px;
   letter-spacing: -0.01em;
 }
@@ -143,18 +191,18 @@ h3 {
   font-size: 1.1rem;
 }
 
+/* Título de la fiesta: color sólido y peso, no degradado. El brillo lo da un
+   halo suave detrás del texto, intencional y contenido. */
 .titulo-fiesta {
-  background: linear-gradient(100deg, var(--naranja) 10%, var(--amarillo) 55%, var(--lima) 95%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 40px rgba(255, 122, 24, 0.25);
+  color: var(--ambar-claro);
+  text-shadow: 0 0 36px rgba(244, 166, 19, 0.22);
 }
 
 .acento-creepy {
   font-family: 'Creepster', cursive;
   font-weight: 400;
   letter-spacing: 0.03em;
+  color: var(--veneno);
 }
 
 .subtitulo {
@@ -163,15 +211,26 @@ h3 {
   font-family: var(--fuente-serif);
 }
 
+/* Antiguo "eyebrow" reconvertido: ya no es un kicker en mayúsculas sobre el
+   título (ese patrón se eliminó). Queda como una marca discreta de sección
+   cuando se usa suelta, con una línea en vez de puro texto flotante. */
 .eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--fuente-texto);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--naranja-claro);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--texto-tenue);
   margin-bottom: 14px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: var(--ambar);
 }
 
 /* ---- Formularios ---- */
@@ -294,30 +353,32 @@ input:focus {
 }
 
 /* ---- Avisos ---- */
+/* Sin barra lateral de color: borde completo fino tintado del color de estado
+   más un fondo translúcido. El color comunica, no una franja delatora. */
 .aviso {
   padding: 13px 16px;
   border-radius: var(--radio-sm);
   margin-bottom: 18px;
   font-size: 0.95rem;
-  border-left: 3px solid;
+  border: 1px solid transparent;
 }
 
 .aviso-error {
-  background: rgba(255, 84, 112, 0.1);
-  border-color: var(--rojo);
-  color: #ffb3c1;
+  background: rgba(224, 96, 116, 0.1);
+  border-color: rgba(224, 96, 116, 0.4);
+  color: #f3b8c1;
 }
 
 .aviso-ok {
-  background: rgba(74, 222, 128, 0.1);
-  border-color: var(--verde);
-  color: #b5f5cd;
+  background: rgba(91, 191, 123, 0.1);
+  border-color: rgba(91, 191, 123, 0.4);
+  color: #bdeccb;
 }
 
 .aviso-warn {
-  background: rgba(255, 214, 10, 0.1);
-  border-color: var(--amarillo);
-  color: #ffe98a;
+  background: rgba(232, 182, 58, 0.1);
+  border-color: rgba(232, 182, 58, 0.4);
+  color: #f0d896;
 }
 
 /* ---- Etiquetas de estado ---- */
@@ -458,15 +519,40 @@ tr:last-child td {
 }
 
 .info-lista .icono {
-  font-size: 1.4rem;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
-  background: rgba(255, 122, 24, 0.1);
+  background: rgba(244, 166, 19, 0.08);
   border: 1px solid var(--borde-claro);
   border-radius: 10px;
+  color: var(--ambar-claro);
+}
+
+.info-lista .icono svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Icono grande destacado (encabezados de tarjeta: éxito, carrete bloqueado…) */
+.icono-destacado {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  color: var(--ambar-claro);
+}
+
+.icono-destacado svg {
+  width: 48px;
+  height: 48px;
 }
 
 .info-dato {
@@ -491,14 +577,74 @@ tr:last-child td {
   gap: 14px;
   align-items: center;
   padding: 14px 16px;
-  background: rgba(10, 7, 16, 0.4);
+  background: rgba(8, 6, 17, 0.45);
   border: 1px solid var(--borde);
   border-radius: var(--radio-sm);
 }
 
-.premio-medalla {
-  font-size: 1.8rem;
+/* Número de puesto: dato con significado (el ranking), tratado como medalla
+   grabada en vez de emoji. */
+.premio-puesto {
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--negro);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+.premio-puesto--1 {
+  background: linear-gradient(150deg, #f6d365, #d4982a);
+}
+
+.premio-puesto--2 {
+  background: linear-gradient(150deg, #d8d8e0, #9a9aab);
+}
+
+.premio-puesto--3 {
+  background: linear-gradient(150deg, #d99a6c, #a9663b);
+}
+
+/* Pie de la landing con el acceso discreto de staff. */
+.landing-pie {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--borde);
+  text-align: center;
+}
+
+.landing-pie-link {
+  font-family: var(--fuente-texto);
+  font-size: 0.82rem;
+  color: var(--texto-tenue);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s ease;
+}
+
+.landing-pie-link:hover {
+  color: var(--ambar-claro);
+}
+
+/* Enlace de volver con flecha, consistente en todas las páginas. */
+.volver-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--fuente-texto);
+  font-size: 0.9rem;
+  color: var(--texto-tenue);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.volver-link:hover {
+  color: var(--ambar-claro);
 }
 
 /* ---- Animación sutil de entrada ---- */
@@ -549,32 +695,43 @@ tr:last-child td {
 
 .evento-card--activo:hover {
   transform: translateY(-3px);
-  border-color: var(--naranja);
-  box-shadow: 0 18px 50px -20px rgba(255, 122, 24, 0.5);
+  border-color: var(--ambar);
+  box-shadow: 0 20px 54px -24px rgba(244, 166, 19, 0.45);
 }
 
 .evento-card--proximo {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
-  filter: grayscale(0.4);
-}
-
-.evento-emoji {
-  font-size: 2.6rem;
-  display: block;
-  margin-bottom: 12px;
 }
 
 .evento-titulo {
-  font-family: var(--fuente-serif);
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: 1.6rem;
   margin-bottom: 6px;
+  letter-spacing: 0.01em;
 }
 
 .evento-meta {
   color: var(--texto-tenue);
   font-size: 0.95rem;
+  font-family: var(--fuente-serif);
+}
+
+/* Flecha de "entrar" que se desliza en hover: el afford visual sin emoji. */
+.evento-flecha {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  color: var(--ambar-claro);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.evento-card--activo:hover .evento-flecha {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .evento-badge {
@@ -637,9 +794,26 @@ tr:last-child td {
 }
 
 .resultado-icono {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 8px;
+  display: inline-grid;
+  place-items: center;
+  margin-bottom: 10px;
+}
+
+.resultado-icono svg {
+  width: 48px;
+  height: 48px;
+}
+
+.resultado-scan--valida .resultado-icono {
+  color: var(--verde);
+}
+
+.resultado-scan--ya_entro .resultado-icono {
+  color: var(--amarillo);
+}
+
+.resultado-scan--invalida .resultado-icono {
+  color: var(--rojo);
 }
 
 .resultado-nombre {
@@ -870,4 +1044,104 @@ tr:last-child td {
   object-fit: cover;
   border-radius: var(--radio-sm);
   border: 1px solid var(--borde);
+}
+
+/* ---- Ajustes para móvil ---- */
+@media (max-width: 480px) {
+  .titulo-fiesta {
+    font-size: clamp(1.9rem, 10vw, 2.6rem);
+  }
+
+  .cuenta-numero {
+    font-size: 1.4rem;
+  }
+
+  .cuenta-etiqueta {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+  }
+
+  .cuenta-bloque {
+    padding: 10px 4px;
+  }
+
+  .cuenta-atras {
+    gap: 7px;
+  }
+}
+
+/* ---- Cuenta atrás de la landing ---- */
+.cuenta-atras {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cuenta-bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 12px 6px;
+  background: rgba(8, 6, 17, 0.55);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+.cuenta-numero {
+  font-size: clamp(1.5rem, 7vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ambar);
+  font-variant-numeric: tabular-nums;
+}
+
+.cuenta-etiqueta {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--texto-tenue);
+}
+
+.cuenta-atras--viva {
+  margin-top: 24px;
+}
+
+.cuenta-atras-vivo {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--calabaza), var(--naranja));
+  color: #1a0e00;
+  font-weight: 700;
+}
+
+/* ---- Galería compartida de la fiesta ---- */
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.galeria-item {
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde);
+}
+
+.galeria-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.galeria-item:hover img {
+  transform: scale(1.05);
 }

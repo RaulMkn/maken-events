@@ -89,6 +89,15 @@ export const config = {
 
   // Nº máximo de fotos por carrete de invitado.
   maxFotosCarrete: Number(process.env.MAX_FOTOS_CARRETE ?? 10),
+
+  // Enlace a la playlist colaborativa de Spotify (opcional). Si está, se
+  // incluye en el email de la entrada. Así solo lo recibe quien tiene entrada.
+  spotifyPlaylistUrl: optional('SPOTIFY_PLAYLIST_URL'),
+
+  // Token para acceder a la galería compartida de fotos. Va en el email, así
+  // solo quien tiene entrada puede abrirla. Si está vacío, la galería se
+  // deshabilita (no expone fotos de los invitados a cualquiera).
+  galeriaToken: optional('GALERIA_TOKEN'),
 } as const;
 
 /** ¿Está Appwrite Storage configurado y listo para subir? */

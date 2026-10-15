@@ -231,6 +231,15 @@ export function estadoCarrete(token: string): Promise<EstadoCarrete> {
   return request(`/api/carrete/${encodeURIComponent(token)}`);
 }
 
+export interface FotoGaleria {
+  id: string;
+  url: string;
+}
+
+export function listarGaleria(token: string): Promise<{ total: number; fotos: FotoGaleria[] }> {
+  return request(`/api/galeria?token=${encodeURIComponent(token)}`);
+}
+
 /**
  * Sube una foto (Blob/File ya comprimido) al carrete. Usa multipart, por eso
  * no pasa por el helper `request` (que es solo para JSON).
