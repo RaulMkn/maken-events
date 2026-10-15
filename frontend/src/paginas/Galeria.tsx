@@ -16,7 +16,9 @@ export default function Galeria() {
 
   const cargar = useCallback(async () => {
     if (!token) {
-      setError('Enlace de galería no válido. Abre el que te llegó en el email.');
+      setError(
+        'A esta galería se entra con el enlace de tu email. Parece que falta el código de acceso: abre el botón "Ver la galería" del correo de tu entrada.',
+      );
       setCargando(false);
       return;
     }
@@ -27,11 +29,17 @@ export default function Galeria() {
       setFotos(data.fotos);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setError('Enlace de galería no válido. Abre el que te llegó en el email.');
+        setError(
+          'Este enlace de galería ha caducado o no es válido. Usa el botón "Ver la galería" del último correo de tu entrada, o pídele a la organización el enlace actualizado.',
+        );
       } else if (err instanceof ApiError && err.status === 503) {
-        setError('La galería aún no está disponible. Vuelve un poco más tarde.');
+        setError(
+          'La galería todavía no está activa. Se enciende cuando empiece la fiesta: vuelve a abrir este enlace un poco más tarde.',
+        );
       } else {
-        setError('No se pudo cargar la galería.');
+        setError(
+          'No hemos podido cargar las fotos ahora mismo. Revisa tu conexión e inténtalo de nuevo con el botón de abajo.',
+        );
       }
     } finally {
       setCargando(false);
@@ -55,33 +63,37 @@ export default function Galeria() {
           </p>
         </header>
 
-        {error && (
-          <div className="aviso aviso-error" role="alert">
-            {error}
-          </div>
-        )}
-
         {cargando ? (
           <p className="subtitulo centrado">Cargando fotos…</p>
-        ) : !error && fotos.length === 0 ? (
+        ) : error ? (
+          <div className="tarjeta centrado aparece" style={{ maxWidth: 460, margin: '0 auto' }}>
+            <p className="subtitulo" style={{ margin: 0 }}>
+              {error}
+            </p>
+            <button className="boton boton-secundario mt" onClick={cargar}>
+              Reintentar
+            </button>
+          </div>
+        ) : fotos.length === 0 ? (
           <p className="subtitulo centrado">
             Todavía no hay fotos. Sé el primero en subir una desde tu carrete.
           </p>
         ) : (
-          <div className="galeria-grid">
-            {fotos.map((f) => (
-              <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="galeria-item">
-                <img src={f.url} alt="Foto de la fiesta" loading="lazy" />
-              </a>
-            ))}
-          </div>
+          <>
+            <div className="galeria-grid">
+              {fotos.map((f) => (
+                <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="galeria-item">
+                  <img src={f.url} alt="Foto de la fiesta" loading="lazy" />
+                </a>
+              ))}
+            </div>
+            <div className="centrado" style={{ marginTop: 24 }}>
+              <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
+                Actualizar
+              </button>
+            </div>
+          </>
         )}
-
-        <div className="centrado" style={{ marginTop: 24 }}>
-          <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
-            Actualizar
-          </button>
-        </div>
       </div>
     </div>
   );
