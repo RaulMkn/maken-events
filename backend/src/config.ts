@@ -35,7 +35,6 @@ const isProd = (process.env.NODE_ENV ?? 'development') === 'production';
 export const config = {
   isProd,
   port: Number(process.env.PORT ?? 3000),
-  publicHost: optional('PUBLIC_HOST', 'localhost'),
 
   // Conexión a PostgreSQL. En Heroku la inyecta el add-on como DATABASE_URL.
   databaseUrl: isProd
