@@ -270,6 +270,88 @@ Espero un chupito de cortesia. — El equipo de Maken Events`;
 }
 
 /** Escapa caracteres HTML para evitar inyección en el cuerpo del email. */
+interface DatosRechazo {
+  nombre: string;
+  email: string;
+}
+
+/**
+ * Email de rechazo: se envía al no poder confirmar quién invitó a la persona.
+ * Explica que, al ser una fiesta privada, en principio no puede asistir, e
+ * invita a contactar con la organización si cree que es un error.
+ */
+export async function enviarEmailRechazo(datos: DatosRechazo): Promise<void> {
+  const cliente = getResend();
+  const remitente = config.email.from || 'entradas@maken-events.app';
+  const asunto = `Sobre tu registro para ${config.partyName}`;
+
+  const html = `
+  <!doctype html>
+  <html lang="es">
+  <body style="margin:0; padding:0; background-color:#080611;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#080611; padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px; background:#150f28; border:1px solid #2a2140; border-radius:16px; overflow:hidden;">
+            <tr><td style="height:3px; background:#f4a613; line-height:3px; font-size:3px;">&nbsp;</td></tr>
+            <tr>
+              <td style="padding:36px 32px 8px 32px; text-align:center;">
+                <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#a99fc4; font-family:Arial,Helvetica,sans-serif; font-weight:bold;">
+                  Maken Events
+                </div>
+                <h1 style="margin:12px 0 0 0; font-family:Georgia,'Times New Roman',serif; font-size:26px; color:#ffc24d;">
+                  ${escaparHtml(config.partyName)}
+                </h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 32px 8px 32px; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:1.65; color:#efeafc;">
+                <p style="margin:0 0 12px 0;">Hola ${escaparHtml(datos.nombre)},</p>
+                <p style="margin:0 0 12px 0; color:#b3a4cc;">
+                  Gracias por tu interés en la fiesta, desafortunadamente no hemos podido confirmar quién te ha invitado y,
+                  al tratarse de un evento privado, en principio no puedes asistir.
+                </p>
+                <p style="margin:0; color:#b3a4cc;">
+                  Si crees que se trata de un error, por favor, ponte en contacto con quien te invito o con la organización (maken)
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
+                — El equipo de Maken Events
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `;
+
+  const texto = `Maken Events — ${config.partyName}
+
+Hola ${datos.nombre},
+
+Gracias por tu interés en la fiesta. No hemos podido confirmar quién te invita y, al tratarse de un evento privado, en principio no podrás asistir.
+
+Si crees que es un error, escríbenos y lo revisamos: contacta con la organización (maken) y lo vemos juntos.
+
+— El equipo de Maken Events`;
+
+  const resultado = await cliente.emails.send({
+    from: `Maken Events <${remitente}>`,
+    to: datos.email,
+    subject: asunto,
+    html,
+    text: texto,
+  });
+
+  if (resultado.error) {
+    throw new Error(`Resend devolvió un error: ${resultado.error.message}`);
+  }
+}
+
 function escaparHtml(texto: string): string {
   return texto
     .replace(/&/g, '&amp;')

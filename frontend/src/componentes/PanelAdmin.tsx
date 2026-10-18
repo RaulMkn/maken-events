@@ -4,6 +4,7 @@ import {
   confirmarPago,
   reenviarEmail,
   eliminarAsistente,
+  rechazarAsistente,
   logout,
   ApiError,
   type Asistente,
@@ -82,11 +83,34 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
     }
   }
 
+  async function onRechazar(a: Asistente) {
+    const nombre = `${a.nombre} ${a.apellidos}`.trim();
+    if (
+      !confirm(
+        `¿Rechazar a ${nombre}? Se le enviará un email avisando de que no se pudo confirmar su invitación y se eliminará del listado.`,
+      )
+    ) {
+      return;
+    }
+    setAccionEnCurso(a.id);
+    setAviso(null);
+    setError(null);
+    try {
+      await rechazarAsistente(a.id);
+      setAviso(`${nombre} rechazado: se le avisó por email y se eliminó del listado.`);
+      await cargar();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo rechazar.');
+    } finally {
+      setAccionEnCurso(null);
+    }
+  }
+
   async function onEliminar(a: Asistente) {
     const nombre = `${a.nombre} ${a.apellidos}`.trim();
     if (
       !confirm(
-        `¿Eliminar a ${nombre} del listado? Esta acción no se puede deshacer.`,
+        `¿Eliminar a ${nombre} del listado? No se le enviará ningún email. Esta acción no se puede deshacer.`,
       )
     ) {
       return;
@@ -190,10 +214,6 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
             <div className="metrica-numero">{resumen.disfrazados}</div>
             <div className="metrica-etiqueta">Disfrazados</div>
           </div>
-          <div className="metrica">
-            <div className="metrica-numero">{resumen.validados}</div>
-            <div className="metrica-etiqueta">Validados</div>
-          </div>
         </div>
       )}
 
@@ -222,7 +242,6 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Disfraz</th>
-                    <th>Confianza</th>
                     <th>Pago</th>
                     <th>Email</th>
                     <th>Entrada</th>
@@ -237,13 +256,6 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
                       </td>
                       <td>{a.email}</td>
                       <td>{a.disfrazado ? (a.disfraz ?? 'Sí') : '—'}</td>
-                      <td>
-                        {a.validadoLista ? (
-                          <span className="etiqueta etiqueta-pagado">✅ Validado</span>
-                        ) : (
-                          <span className="etiqueta etiqueta-pendiente">Sin validar</span>
-                        )}
-                      </td>
                       <td>
                         <span className={`etiqueta etiqueta-${a.estadoPago}`}>
                           {a.estadoPago === 'pagado' ? 'Pagado' : 'Pendiente'}
@@ -270,6 +282,14 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
                               {accionEnCurso === a.id ? '…' : 'Reenviar entrada'}
                             </button>
                           )}
+                          <button
+                            className="boton boton-secundario boton-pequeno"
+                            onClick={() => onRechazar(a)}
+                            disabled={accionEnCurso === a.id}
+                            aria-label={`Rechazar a ${a.nombre} ${a.apellidos}`}
+                          >
+                            Rechazar
+                          </button>
                           <button
                             className="boton boton-peligro boton-pequeno"
                             onClick={() => onEliminar(a)}

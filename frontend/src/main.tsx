@@ -7,7 +7,6 @@ import Landing from './paginas/Landing.tsx';
 import Registro from './paginas/Registro.tsx';
 import Admin from './paginas/Admin.tsx';
 import Staff from './paginas/Staff.tsx';
-import Invitados from './paginas/Invitados.tsx';
 import Carrete from './paginas/Carrete.tsx';
 import Galeria from './paginas/Galeria.tsx';
 
@@ -20,7 +19,6 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/halloween/registro" element={<Registro />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/staff" element={<Staff />} />
-        <Route path="/halloween/invitados" element={<Invitados />} />
         <Route path="/halloween/carrete/:token" element={<Carrete />} />
         <Route path="/halloween/galeria" element={<Galeria />} />
       </Routes>

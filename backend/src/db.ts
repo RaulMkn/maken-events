@@ -33,7 +33,6 @@ export async function initDb(): Promise<void> {
       de_parte_de   TEXT,
       ha_entrado    BOOLEAN NOT NULL DEFAULT false,
       entrado_en    TIMESTAMPTZ,
-      validado_lista BOOLEAN NOT NULL DEFAULT false,
       token_carrete TEXT,
       fotos_carrete INTEGER NOT NULL DEFAULT 0
     );
@@ -63,9 +62,6 @@ export async function initDb(): Promise<void> {
   );
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS entrado_en TIMESTAMPTZ;`);
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS precio_pagado_centimos INTEGER;`);
-  await pool.query(
-    `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS validado_lista BOOLEAN NOT NULL DEFAULT false;`,
-  );
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS token_carrete TEXT;`);
   await pool.query(
     `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS fotos_carrete INTEGER NOT NULL DEFAULT 0;`,
@@ -135,7 +131,6 @@ export interface AsistenteRow {
   ha_entrado: boolean;
   entrado_en: string | null;
   precio_pagado_centimos: number | null;
-  validado_lista: boolean;
   token_carrete: string | null;
   fotos_carrete: number;
 }

@@ -8,7 +8,7 @@ import {
   type GastoRow,
 } from '../db.js';
 import { protegerAdmin } from '../lib/proteger-admin.js';
-import { enviarEmailEntrada } from '../lib/email.js';
+import { enviarEmailEntrada, enviarEmailRechazo } from '../lib/email.js';
 import { limpiarTexto } from '../lib/validacion.js';
 
 /** Endpoints del panel admin. Todos protegidos con sesión admin válida. */
@@ -27,7 +27,6 @@ interface AsistenteDTO {
   creadoEn: string;
   pagadoEn: string | null;
   precioPagadoCentimos: number | null;
-  validadoLista: boolean;
 }
 
 function aDTO(row: AsistenteRow): AsistenteDTO {
@@ -45,7 +44,6 @@ function aDTO(row: AsistenteRow): AsistenteDTO {
     creadoEn: row.creado_en,
     pagadoEn: row.pagado_en,
     precioPagadoCentimos: row.precio_pagado_centimos,
-    validadoLista: row.validado_lista,
   };
 }
 
@@ -64,7 +62,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       pendientes: asistentes.filter((a) => a.estadoPago === 'pendiente').length,
       disfrazados: asistentes.filter((a) => a.disfrazado).length,
       entrados: asistentes.filter((a) => a.haEntrado).length,
-      validados: asistentes.filter((a) => a.validadoLista).length,
     };
 
     return { resumen, asistentes };
@@ -86,7 +83,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       'Precio pagado (EUR)',
       'Email enviado',
       'Ha entrado',
-      'Validado en lista',
       'Creado en',
       'Pagado en',
     ];
@@ -103,7 +99,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
         r.precio_pagado_centimos != null ? (r.precio_pagado_centimos / 100).toFixed(2) : '',
         r.email_enviado ? 'Sí' : 'No',
         r.ha_entrado ? 'Sí' : 'No',
-        r.validado_lista ? 'Sí' : 'No',
         r.creado_en ?? '',
         r.pagado_en ?? '',
       ]
@@ -242,6 +237,47 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           .status(502)
           .send({ error: 'No se pudo enviar el email. Revisa la configuración del correo (SMTP).' });
       }
+    },
+  );
+
+  // Rechaza a un asistente: le avisa por email de que no se pudo confirmar su
+  // invitación y lo elimina. Si el email falla, no se borra, para poder reintentar.
+  app.post<{ Params: { id: string } }>(
+    '/asistentes/:id/rechazar',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: { id: { type: 'string', minLength: 1, maxLength: 40 } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { rows } = await pool.query<AsistenteRow>(
+        'SELECT * FROM asistentes WHERE id = $1',
+        [request.params.id],
+      );
+      const row = rows[0];
+      if (!row) {
+        return reply.status(404).send({ error: 'Asistente no encontrado.' });
+      }
+
+      try {
+        await enviarEmailRechazo({ nombre: row.nombre, email: row.email });
+      } catch (err) {
+        request.log.error(
+          { motivo: err instanceof Error ? err.message : 'desconocido', asistenteId: row.id },
+          'Falló el email de rechazo; no se elimina al asistente',
+        );
+        return reply
+          .status(502)
+          .send({ error: 'No se pudo enviar el email de rechazo. No se ha eliminado a nadie; inténtalo de nuevo.' });
+      }
+
+      await pool.query('DELETE FROM asistentes WHERE id = $1', [row.id]);
+      request.log.info({ asistenteId: row.id }, 'Asistente rechazado y eliminado');
+      return reply.send({ ok: true });
     },
   );
 

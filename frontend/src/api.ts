@@ -13,7 +13,6 @@ export interface Asistente {
   haEntrado: boolean;
   creadoEn: string;
   pagadoEn: string | null;
-  validadoLista: boolean;
 }
 
 export interface ResumenAsistentes {
@@ -22,7 +21,6 @@ export interface ResumenAsistentes {
   pendientes: number;
   disfrazados: number;
   entrados: number;
-  validados: number;
 }
 
 export interface DatosRegistro {
@@ -47,13 +45,6 @@ export interface Finanzas {
   gastosCentimos: number;
   beneficioCentimos: number;
   precioEntradaCentimos: number;
-}
-
-export interface Invitado {
-  id: string;
-  nombre: string;
-  deParteDe: string | null;
-  validado: boolean;
 }
 
 export interface ResultadoVerificacion {
@@ -142,6 +133,10 @@ export function eliminarAsistente(id: string): Promise<{ ok: true }> {
   return request(`/api/admin/asistentes/${id}`, { method: 'DELETE' });
 }
 
+export function rechazarAsistente(id: string): Promise<{ ok: true }> {
+  return request(`/api/admin/asistentes/${id}/rechazar`, { method: 'POST' });
+}
+
 export function obtenerFinanzas(): Promise<Finanzas> {
   return request('/api/admin/finanzas');
 }
@@ -192,20 +187,6 @@ export function verificarEntrada(token: string): Promise<ResultadoVerificacion> 
   return request('/api/staff/verificar', {
     method: 'POST',
     body: JSON.stringify({ token }),
-  });
-}
-
-export function listarInvitados(): Promise<{ total: number; invitados: Invitado[] }> {
-  return request('/api/staff/invitados');
-}
-
-export function validarInvitado(
-  id: string,
-  validado: boolean,
-): Promise<{ ok: true; id: string; validado: boolean }> {
-  return request('/api/staff/invitados/validar', {
-    method: 'POST',
-    body: JSON.stringify({ id, validado }),
   });
 }
 
