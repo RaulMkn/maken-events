@@ -78,7 +78,7 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
                     <td style="padding:18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.6; text-align:center;">
                       <div style="font-size:22px; margin-bottom:6px;">🎵</div>
                       <strong style="color:#1ed760;">Que nadie se queje de la musica pls</strong><br>
-                      <span style="color:#b3a4cc;">La administración (Maken) se reserva el derecho a eliminar canciones que no sean de fiera.</span>
+                      <span style="color:#b3a4cc;">La administración (Maken) se reserva el derecho a eliminar canciones que no sean de fiesta.</span>
                       <div style="margin-top:14px;">
                         <a href="${config.spotifyPlaylistUrl}" style="display:inline-block; background:#1ed760; color:#06220f; text-decoration:none; font-weight:bold; padding:11px 22px; border-radius:999px;">Abrir la playlist</a>
                       </div>
