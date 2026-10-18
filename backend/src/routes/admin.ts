@@ -218,13 +218,24 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Este asistente no tiene el pago confirmado todavía.' });
       }
 
+      // Los pagos confirmados antes de existir el carrete no tienen token:
+      // se lo generamos aquí para que el email reenviado incluya el carrete.
+      let tokenCarrete = row.token_carrete;
+      if (!tokenCarrete) {
+        tokenCarrete = nanoid(21);
+        await pool.query('UPDATE asistentes SET token_carrete = $1 WHERE id = $2', [
+          tokenCarrete,
+          row.id,
+        ]);
+      }
+
       try {
         await enviarEmailEntrada({
           nombre: row.nombre,
           apellidos: row.apellidos ?? '',
           email: row.email,
           tokenQr: row.token_qr,
-          tokenCarrete: row.token_carrete,
+          tokenCarrete,
         });
         await pool.query('UPDATE asistentes SET email_enviado = true WHERE id = $1', [row.id]);
         return reply.send({ ok: true, emailEnviado: true });
