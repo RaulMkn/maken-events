@@ -5,11 +5,7 @@ import { registrar, ApiError } from '../api.ts';
 import { condicionesHtml, condicionesHtmlScrollable } from '../condiciones.ts';
 import { IconoFantasma } from '../componentes/Iconos.tsx';
 
-/**
- * Formulario de registro. Antes de enviar, se muestran las condiciones de
- * asistencia (SweetAlert2) que el usuario debe aceptar explícitamente.
- * El campo "de qué te disfrazas" solo aparece si marca la casilla (texto libre).
- */
+/** Formulario de registro: exige aceptar las condiciones antes de enviar. */
 export default function Registro() {
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
@@ -21,7 +17,6 @@ export default function Registro() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
-  // Aviso (no bloqueo) ya se hizo un registro desde este navegador.
   const [yaRegistradoAqui, setYaRegistradoAqui] = useState(false);
 
   useEffect(() => {
@@ -52,11 +47,7 @@ export default function Registro() {
       return;
     }
 
-    // El disfraz es opcional: si va disfrazado/a pero no quiere decir de qué
-    // (para mantener la sorpresa), lo dejamos en blanco sin bloquear.
-
-    // Mostramos las condiciones y exigimos leerlas (scroll hasta el final)
-    // antes de poder aceptar.
+    // Exigimos leer las condiciones (scroll hasta el final) antes de aceptar.
     const resultado = await Swal.fire({
       title: 'Condiciones de asistencia',
       html: condicionesHtmlScrollable(),
@@ -105,7 +96,7 @@ export default function Registro() {
     });
 
     if (!resultado.isConfirmed) {
-      return; // no aceptó: no registramos
+      return;
     }
 
     setEnviando(true);

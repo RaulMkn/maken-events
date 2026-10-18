@@ -3,10 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { listarGaleria, ApiError, type FotoGaleria } from '../api.ts';
 import { IconoGaleria } from '../componentes/Iconos.tsx';
 
-/**
- * Galería compartida de la fiesta: muestra todas las fotos que los invitados
- * suben desde sus carretes. El acceso es por un token que llega en el email.
- */
+/** Galería compartida de la fiesta. El acceso es por un token que llega en el email. */
 export default function Galeria() {
   const [params] = useSearchParams();
   const token = params.get('token') ?? '';

@@ -2,9 +2,8 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
 
 /**
- * Sesión del admin: un JWT corto firmado con SESSION_SECRET que viaja
- * en una cookie httpOnly + sameSite=strict + secure (en prod).
- * No guardamos estado de sesión en servidor: la cookie firmada basta.
+ * Sesión sin estado en servidor: un JWT firmado con SESSION_SECRET que viaja
+ * en cookie httpOnly + sameSite=strict + secure (en prod).
  */
 
 export const COOKIE_SESION = 'admin_sesion';
@@ -14,7 +13,7 @@ const DURACION = '8h';
 const DURACION_STAFF = '12h';
 
 interface SesionPayload {
-  sub: string; // usuario admin
+  sub: string;
   role: 'admin';
 }
 

@@ -573,6 +573,48 @@ tr:last-child td {
   margin-top: 8px;
 }
 
+/* El botín del concurso: las tres botellas en juego, en fila. */
+.botin {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+
+.botin-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 64px;
+  padding: 14px 10px;
+  border: 1px solid var(--borde-claro);
+  border-radius: var(--radio-sm);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(244, 166, 19, 0.1), transparent 70%),
+    rgba(8, 6, 17, 0.5);
+}
+
+.botin-licor {
+  font-family: var(--fuente-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ambar-claro);
+  line-height: 1.25;
+}
+
+@media (max-width: 480px) {
+  .botin {
+    grid-template-columns: 1fr;
+  }
+  .botin-item {
+    min-height: 0;
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
 .premio {
   display: flex;
   gap: 14px;

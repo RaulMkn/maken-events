@@ -4,10 +4,7 @@ import { usuarioValido, verificarPassword, verificarTotp } from '../lib/auth.js'
 import { COOKIE_SESION, crearTokenSesion } from '../lib/sesion.js';
 import { protegerAdmin } from '../lib/proteger-admin.js';
 
-/**
- * Autenticación del admin: login con usuario + contraseña + código TOTP,
- * en un único paso (MFA obligatorio). Rate limit estricto contra fuerza bruta.
- */
+/** Autenticación del admin: usuario + contraseña + TOTP en un paso (MFA obligatorio). */
 
 interface LoginBody {
   usuario: string;
@@ -34,7 +31,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     {
       schema: loginSchema,
       config: {
-        // Muy restrictivo: protege contra fuerza bruta de credenciales/TOTP.
+        // Restrictivo contra fuerza bruta de credenciales/TOTP.
         rateLimit: { max: 5, timeWindow: '5 minutes' },
       },
     },
@@ -43,8 +40,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       const { usuario, password, totp } = request.body;
 
-      // Verificamos siempre las tres cosas antes de responder, y devolvemos
-      // un error genérico: no revelamos si falló el usuario, la clave o el TOTP.
+      // Error genérico para no revelar si falló el usuario, la clave o el TOTP.
       const okUsuario = usuarioValido(usuario);
       const okPassword = await verificarPassword(password);
       const okTotp = verificarTotp(totp);
@@ -60,7 +56,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         sameSite: 'strict',
         secure: request.protocol === 'https',
         path: '/',
-        maxAge: 8 * 60 * 60, // 8 horas en segundos
+        maxAge: 8 * 60 * 60,
       });
 
       request.log.info({ usuario }, 'Login admin correcto');
@@ -73,7 +69,6 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     return reply.send({ ok: true });
   });
 
-  // Permite al frontend saber si la sesión sigue viva.
   app.get('/sesion', { preHandler: protegerAdmin }, async (request) => {
     const usuario = (request as typeof request & { adminUser?: string }).adminUser;
     return { autenticado: true, usuario };

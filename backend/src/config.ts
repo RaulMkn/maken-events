@@ -17,12 +17,7 @@ function optional(name: string, fallback = ''): string {
   return process.env[name] ?? fallback;
 }
 
-/**
- * Decodifica el hash de la contraseña. Si viene con prefijo "b64:", lo
- * interpreta como base64 (así el valor no contiene los '$' del hash argon2
- * que algunos gestores de variables interpretarían como interpolación).
- * Si no, se usa tal cual.
- */
+/** Decodifica el hash; acepta prefijo "b64:" para evitar los '$' del hash argon2 que algunos gestores de variables interpretan como interpolación. */
 function decodificarHash(valor: string): string {
   if (valor.startsWith('b64:')) {
     return Buffer.from(valor.slice(4), 'base64').toString('utf8');
@@ -36,7 +31,6 @@ export const config = {
   isProd,
   port: Number(process.env.PORT ?? 3000),
 
-  // Conexión a PostgreSQL. En Heroku la inyecta el add-on como DATABASE_URL.
   databaseUrl: isProd
     ? required('DATABASE_URL')
     : optional('DATABASE_URL', 'postgres://postgres:postgres@localhost:5432/fiesta'),
@@ -50,35 +44,24 @@ export const config = {
 
   admin: {
     user: optional('ADMIN_USER', 'admin'),
-    // El hash argon2 contiene '$', que algunos gestores de variables de
-    // entorno interpretan como interpolación. Para evitarlo, aceptamos el
-    // hash codificado en base64 con prefijo "b64:" (formato que emite
-    // gen-admin). También admitimos el hash en texto plano por comodidad
-    // en desarrollo.
+    // Aceptamos el hash en base64 (prefijo "b64:") por los '$' del hash argon2.
     passwordHash: decodificarHash(optional('ADMIN_PASSWORD_HASH')),
     totpSecret: optional('ADMIN_TOTP_SECRET'),
   },
 
-  // Contraseña única y compartida para el equipo de puerta (staff).
-  // Login simple, sin MFA: solo sirve para escanear QR en la puerta.
   staffPassword: optional('STAFF_PASSWORD'),
 
-  // Email vía Resend con dominio propio verificado (evita spam por SPF/DKIM).
+  // Remitente verificado en Resend (SPF/DKIM para evitar spam).
   email: {
     resendApiKey: optional('RESEND_API_KEY'),
-    // Remitente. Debe ser una dirección del dominio verificado en Resend.
     from: optional('EMAIL_FROM', 'entradas@maken-events.app'),
   },
 
   partyName: optional('PARTY_NAME', 'Halloween 4.0'),
 
-  // URL pública de la app, para construir enlaces absolutos en los emails
-  // (p. ej. el enlace al carrete de fotos). Sin barra final.
+  // Sin barra final: se usa para construir enlaces absolutos en los emails.
   appUrl: optional('APP_URL', 'https://maken-events.app').replace(/\/+$/, ''),
 
-  // Appwrite Storage: destino de las fotos de los carretes de los invitados.
-  // Si no está configurado, la función de subida devuelve un error claro y
-  // el resto de la app sigue funcionando con normalidad.
   appwrite: {
     endpoint: optional('APPWRITE_ENDPOINT', 'https://cloud.appwrite.io/v1'),
     projectId: optional('APPWRITE_PROJECT_ID'),
@@ -86,20 +69,14 @@ export const config = {
     bucketId: optional('APPWRITE_BUCKET_ID'),
   },
 
-  // Nº máximo de fotos por carrete de invitado.
   maxFotosCarrete: Number(process.env.MAX_FOTOS_CARRETE ?? 10),
 
-  // Enlace a la playlist colaborativa de Spotify (opcional). Si está, se
-  // incluye en el email de la entrada. Así solo lo recibe quien tiene entrada.
   spotifyPlaylistUrl: optional('SPOTIFY_PLAYLIST_URL'),
 
-  // Token para acceder a la galería compartida de fotos. Va en el email, así
-  // solo quien tiene entrada puede abrirla. Si está vacío, la galería se
-  // deshabilita (no expone fotos de los invitados a cualquiera).
+  // El token va en el email; si está vacío, la galería se deshabilita para no exponer las fotos a cualquiera.
   galeriaToken: optional('GALERIA_TOKEN'),
 } as const;
 
-/** ¿Está Appwrite Storage configurado y listo para subir? */
 export function almacenamientoConfigurado(): boolean {
   return Boolean(
     config.appwrite.projectId && config.appwrite.apiKey && config.appwrite.bucketId,

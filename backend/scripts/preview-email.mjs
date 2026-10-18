@@ -102,6 +102,53 @@ const html = `
           </tr>
           <tr>
             <td style="padding:16px 32px 0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1a1230; border:1px solid #3d3159; border-radius:12px;">
+                <tr>
+                  <td style="padding:20px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.6;">
+                    <strong style="color:#ffc24d; font-size:16px;">Concurso de disfraces</strong><br>
+                    <span style="color:#b3a4cc;">Un jurado elige a los tres mejores disfraces de la noche. En juego:</span>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+                      <tr>
+                        <td style="background:#1f1636; padding:14px 6px; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:bold; color:#ffc24d; font-size:12px; border:1px solid #3d3159; border-radius:9px;">Tequila<br>de fresa</td>
+                        <td style="width:8px;">&nbsp;</td>
+                        <td style="background:#1f1636; padding:14px 6px; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:bold; color:#ffc24d; font-size:12px; border:1px solid #3d3159; border-radius:9px;">Licor 43</td>
+                        <td style="width:8px;">&nbsp;</td>
+                        <td style="background:#1f1636; padding:14px 6px; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:bold; color:#ffc24d; font-size:12px; border:1px solid #3d3159; border-radius:9px;">Baileys</td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px; background:#120d22; border:1px solid #2a2140; border-radius:9px;">
+                      <tr>
+                        <td width="52" style="padding:12px 0 12px 14px; vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="34" height="34" align="center" valign="middle" style="width:34px; height:34px; background:#f6d365; background-image:linear-gradient(150deg, #f6d365, #d4982a); border-radius:50%; color:#1a0e00; font-family:Georgia,serif; font-weight:bold; font-size:16px;">1</td></tr></table>
+                        </td>
+                        <td style="padding:12px 14px 12px 12px; vertical-align:middle; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#f4eefb; line-height:1.5;"><strong>Primer puesto</strong> &mdash; elige la botella que quiera entre las tres.</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px; background:#120d22; border:1px solid #2a2140; border-radius:9px;">
+                      <tr>
+                        <td width="52" style="padding:12px 0 12px 14px; vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="34" height="34" align="center" valign="middle" style="width:34px; height:34px; background:#d8d8e0; background-image:linear-gradient(150deg, #d8d8e0, #9a9aab); border-radius:50%; color:#1a0e00; font-family:Georgia,serif; font-weight:bold; font-size:16px;">2</td></tr></table>
+                        </td>
+                        <td style="padding:12px 14px 12px 12px; vertical-align:middle; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#f4eefb; line-height:1.5;"><strong>Segundo puesto</strong> &mdash; se lleva una de las dos que queden.</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px; background:#120d22; border:1px solid #2a2140; border-radius:9px;">
+                      <tr>
+                        <td width="52" style="padding:12px 0 12px 14px; vertical-align:middle;">
+                          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="34" height="34" align="center" valign="middle" style="width:34px; height:34px; background:#d99a6c; background-image:linear-gradient(150deg, #d99a6c, #a9663b); border-radius:50%; color:#1a0e00; font-family:Georgia,serif; font-weight:bold; font-size:16px;">3</td></tr></table>
+                        </td>
+                        <td style="padding:12px 14px 12px 12px; vertical-align:middle; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#f4eefb; line-height:1.5;"><strong>Tercer puesto</strong> &mdash; se queda con la botella restante.</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 32px 0 32px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c2016; border:1px solid #1db95433; border-radius:12px;">
                 <tr>
                   <td style="padding:18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.6; text-align:center;">

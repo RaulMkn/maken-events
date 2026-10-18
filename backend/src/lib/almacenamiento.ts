@@ -3,15 +3,9 @@ import { InputFile } from 'node-appwrite/file';
 import { config, almacenamientoConfigurado } from '../config.js';
 
 /**
- * Almacenamiento de las fotos de los carretes de los invitados.
- *
- * Toda la integración con Appwrite vive aquí: si algún día cambiamos de
- * proveedor (S3, Cloudinary…), solo hay que tocar este fichero. El resto de
- * la app solo conoce `subirFoto()`.
- *
- * Appwrite se configura con variables de entorno (APPWRITE_*). Si no están,
- * `subirFoto` lanza un error claro y la ruta de subida responde 503, sin
- * afectar al resto de la aplicación.
+ * Integración con Appwrite aislada aquí para poder cambiar de proveedor sin
+ * tocar el resto de la app. Si no está configurado, lanza un error que la ruta
+ * traduce a un 503 sin afectar al resto.
  */
 
 let storage: Storage | null = null;
@@ -31,16 +25,10 @@ function getStorage(): Storage {
 }
 
 export interface FotoSubida {
-  /** ID del fichero en Appwrite. */
   fileId: string;
 }
 
-/**
- * Sube una foto al bucket de Appwrite. Devuelve el ID del fichero creado.
- *
- * @param buffer   Contenido binario de la imagen.
- * @param nombre   Nombre de fichero sugerido (p. ej. "ada-3.jpg").
- */
+/** Sube una foto al bucket de Appwrite y devuelve el ID del fichero creado. */
 export async function subirFoto(buffer: Buffer, nombre: string): Promise<FotoSubida> {
   const s = getStorage();
   const archivo = InputFile.fromBuffer(buffer, nombre);
@@ -53,13 +41,9 @@ export interface FotoListada {
   creadoEn: string;
 }
 
-/**
- * Lista las fotos del bucket, de la más reciente a la más antigua.
- * Requiere que la API key tenga scope de lectura (files.read).
- */
+/** Lista las fotos del bucket, de la más reciente a la más antigua. */
 export async function listarFotos(limite = 100): Promise<FotoListada[]> {
   const s = getStorage();
-  // Query en formato del SDK: orden descendente por fecha de creación.
   const res = await s.listFiles(config.appwrite.bucketId, [
     `limit(${Math.max(1, Math.min(limite, 100))})`,
     'orderDesc("$createdAt")',

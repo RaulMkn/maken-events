@@ -2,20 +2,15 @@ import pg from 'pg';
 import { config } from './config.js';
 
 /**
- * Capa de datos sobre PostgreSQL (cliente `pg`).
- *
- * Usamos un Pool de conexiones y siempre consultas parametrizadas ($1, $2...),
- * de modo que las consultas van parametrizadas -> se elimina la inyección SQL.
- *
- * En Heroku la conexión viene en DATABASE_URL y requiere SSL.
+ * Capa de datos sobre PostgreSQL. Siempre consultas parametrizadas ($1, $2...)
+ * para eliminar la inyección SQL.
  */
 
 const { Pool } = pg;
 
 export const pool = new Pool({
   connectionString: config.databaseUrl,
-  // Heroku Postgres exige SSL pero con certificados que no validan contra CA
-  // públicas; en local (sin sslmode) lo desactivamos.
+  // Heroku Postgres exige SSL con certificados que no validan contra CA públicas.
   ssl: config.databaseSsl ? { rejectUnauthorized: false } : false,
 });
 
@@ -62,39 +57,29 @@ export async function initDb(): Promise<void> {
   `);
 
   // Migraciones idempotentes para bases de datos ya existentes (Heroku).
-  // Postgres soporta IF NOT EXISTS en ADD COLUMN, así que es seguro repetirlo.
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS de_parte_de TEXT;`);
   await pool.query(
     `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS ha_entrado BOOLEAN NOT NULL DEFAULT false;`,
   );
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS entrado_en TIMESTAMPTZ;`);
-  // Precio realmente pagado por el asistente (en céntimos), fijado al confirmar.
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS precio_pagado_centimos INTEGER;`);
-  // Validación "en lista": alguien de confianza confirma que esta persona es
-  // de fiar (va de parte de alguien conocido). Lo marca el equipo en la puerta.
   await pool.query(
     `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS validado_lista BOOLEAN NOT NULL DEFAULT false;`,
   );
-  // Carrete de fotos: token personal (en el email) y contador de fotos subidas.
   await pool.query(`ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS token_carrete TEXT;`);
   await pool.query(
     `ALTER TABLE asistentes ADD COLUMN IF NOT EXISTS fotos_carrete INTEGER NOT NULL DEFAULT 0;`,
   );
-  // Índice único parcial para buscar rápido por token de carrete (permite NULL).
   await pool.query(
     `CREATE UNIQUE INDEX IF NOT EXISTS uniq_asistentes_token_carrete
      ON asistentes (token_carrete) WHERE token_carrete IS NOT NULL;`,
   );
-  // Índice único parcial: garantiza que no haya dos entradas con el mismo
-  // código de QR (permite varios NULL, para los aún no confirmados).
   await pool.query(
     `CREATE UNIQUE INDEX IF NOT EXISTS uniq_asistentes_token_qr
      ON asistentes (token_qr) WHERE token_qr IS NOT NULL;`,
   );
-  // apellidos deja de ser obligatorio: quitamos el NOT NULL si existiera.
   await pool.query(`ALTER TABLE asistentes ALTER COLUMN apellidos DROP NOT NULL;`).catch(() => {});
 
-  // Precio de entrada por defecto (7,00 €) si no hay ninguno fijado aún.
   await pool.query(
     `INSERT INTO ajustes (clave, valor) VALUES ('precio_entrada_centimos', '700')
      ON CONFLICT (clave) DO NOTHING;`,

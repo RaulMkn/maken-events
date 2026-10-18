@@ -14,8 +14,24 @@ export function normalizarEmail(valor: string): string {
   return valor.trim().toLowerCase();
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+/**
+ * Valida la forma de un email troceando por '@' y '.' (O(n)), evitando una
+ * regex con cuantificadores solapados que podría disparar backtracking (ReDoS).
+ */
 export function emailValido(valor: string): boolean {
-  return EMAIL_RE.test(valor) && valor.length <= 254;
+  if (valor.length < 3 || valor.length > 254) return false;
+
+  const partes = valor.split('@');
+  if (partes.length !== 2) return false;
+
+  const [local, dominio] = partes;
+  if (local.length === 0 || dominio.length === 0) return false;
+
+  const etiquetas = dominio.split('.');
+  if (etiquetas.length < 2) return false;
+  if (etiquetas.some((e) => e.length === 0)) return false;
+
+  if (/\s/.test(valor)) return false;
+
+  return true;
 }

@@ -1,19 +1,11 @@
 /**
- * Agrupación "inteligente" por «de parte de quién».
+ * Agrupa por «de parte de quién» uniendo variantes de la misma persona
+ * (mayúsculas, acentos, uno o dos apellidos…).
  *
- * Problema: la gente escribe el nombre de quien les invita de formas
- * distintas: con mayúsculas o minúsculas, con acentos o sin ellos, con los
- * dos apellidos o solo uno, o solo con el nombre. Queremos juntar a todos los
- * que, en realidad, vienen de parte de la misma persona.
- *
- * Estrategia:
- *  1. Normalizamos cada valor: minúsculas, sin acentos, sin signos y en
- *     tokens (palabras). "José  Pérez-García" -> ["jose", "perez", "garcia"].
- *  2. Dos valores pertenecen al mismo grupo si los tokens de uno están
- *     contenidos en los del otro (p. ej. "garcia" ⊂ "ana garcia", o
- *     "ana" ⊂ "ana garcia"). Es decir, uno es una forma "más corta" del otro.
- *  3. El nombre visible del grupo es la variante más completa (más tokens);
- *     a igualdad, la que tenga más caracteres (suele estar mejor escrita).
+ * Estrategia: se normaliza cada valor a tokens ("José Pérez-García" ->
+ * ["jose","perez","garcia"]); dos valores son el mismo grupo si los tokens de
+ * uno están contenidos en los del otro. El nombre visible es la variante más
+ * completa (más tokens; a igualdad, más larga).
  */
 
 /** Quita acentos/diacríticos de una cadena. */
@@ -21,15 +13,12 @@ function sinAcentos(texto: string): string {
   return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-/**
- * Convierte un «de parte de» en una lista de tokens normalizados.
- * Devuelve [] si no hay nada aprovechable.
- */
+/** Convierte un «de parte de» en tokens normalizados. Devuelve [] si no hay nada aprovechable. */
 export function tokensParte(valor: string | null | undefined): string[] {
   if (!valor) return [];
   return sinAcentos(valor)
     .toLowerCase()
-    // Cualquier cosa que no sea letra o número (incluye guiones, puntos…) separa.
+    // Separa por cualquier cosa que no sea letra o número.
     .split(/[^a-z0-9ñ]+/i)
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
@@ -42,10 +31,8 @@ function esSubconjunto(a: string[], b: string[]): boolean {
 }
 
 /**
- * ¿Dos conjuntos de tokens se refieren (probablemente) a la misma persona?
- * Es cierto cuando uno está contenido en el otro: así "Ana" o "García" se
- * unen a "Ana García", pero "Ana López" y "Ana García" NO se mezclan (ninguno
- * está contenido en el otro: comparten "ana" pero difieren en el apellido).
+ * ¿Dos conjuntos de tokens son la misma persona? Cierto cuando uno está
+ * contenido en el otro, así "Ana García" une a "Ana" pero no a "Ana López".
  */
 export function mismaPersona(a: string[], b: string[]): boolean {
   return esSubconjunto(a, b) || esSubconjunto(b, a);
@@ -65,12 +52,7 @@ interface GrupoInterno<T> {
   elementos: T[];
 }
 
-/**
- * Agrupa una lista de elementos por su «de parte de», uniendo variantes de la
- * misma persona. `getParte` extrae el texto de cada elemento.
- *
- * Los elementos sin «de parte de» van a un grupo final "Sin especificar".
- */
+/** Agrupa elementos por su «de parte de»; los que no lo tienen van a "Sin especificar". */
 export function agruparPorParteInteligente<T>(
   elementos: T[],
   getParte: (e: T) => string | null | undefined,
@@ -87,7 +69,6 @@ export function agruparPorParteInteligente<T>(
       continue;
     }
 
-    // Buscamos un grupo existente cuya forma canónica case con esta variante.
     const grupo = grupos.find((g) => mismaPersona(g.canonicoTokens, tokens));
 
     if (!grupo) {

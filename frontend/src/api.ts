@@ -1,8 +1,4 @@
-/**
- * Cliente HTTP mínimo para hablar con el backend.
- * Todas las llamadas usan el mismo origen (el backend sirve la API y el
- * frontend). Incluimos credentials para que viaje la cookie de sesión.
- */
+/** Cliente HTTP del backend. Usa credentials para que viaje la cookie de sesión. */
 
 export interface Asistente {
   id: string;
@@ -80,8 +76,7 @@ class ApiError extends Error {
 }
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  // Solo declaramos Content-Type JSON si de verdad enviamos cuerpo. Si no,
-  // Fastify rechaza (400) una petición con content-type JSON y body vacío.
+  // Solo declaramos Content-Type JSON si hay cuerpo: Fastify rechaza (400) un body vacío con content-type JSON.
   const headers: Record<string, string> = { ...(options.headers as Record<string, string>) };
   if (options.body != null) {
     headers['Content-Type'] = 'application/json';
@@ -104,7 +99,6 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
-// ---- Público ----
 export function registrar(datos: DatosRegistro): Promise<{ ok: true; mensaje: string }> {
   return request('/api/registro', {
     method: 'POST',
@@ -112,7 +106,6 @@ export function registrar(datos: DatosRegistro): Promise<{ ok: true; mensaje: st
   });
 }
 
-// ---- Admin ----
 export function login(usuario: string, password: string, totp: string): Promise<{ ok: true }> {
   return request('/api/admin/login', {
     method: 'POST',
@@ -149,7 +142,6 @@ export function eliminarAsistente(id: string): Promise<{ ok: true }> {
   return request(`/api/admin/asistentes/${id}`, { method: 'DELETE' });
 }
 
-// ---- Admin: dashboard financiero ----
 export function obtenerFinanzas(): Promise<Finanzas> {
   return request('/api/admin/finanzas');
 }
@@ -181,7 +173,6 @@ export function borrarGasto(id: string): Promise<{ ok: true }> {
   return request(`/api/admin/gastos/${id}`, { method: 'DELETE' });
 }
 
-// ---- Staff (puerta) ----
 export function loginStaff(password: string): Promise<{ ok: true }> {
   return request('/api/staff/login', {
     method: 'POST',
@@ -218,7 +209,6 @@ export function validarInvitado(
   });
 }
 
-// ---- Carrete de fotos (público, por token) ----
 export interface EstadoCarrete {
   nombre: string;
   usadas: number;
@@ -240,10 +230,7 @@ export function listarGaleria(token: string): Promise<{ total: number; fotos: Fo
   return request(`/api/galeria?token=${encodeURIComponent(token)}`);
 }
 
-/**
- * Sube una foto (Blob/File ya comprimido) al carrete. Usa multipart, por eso
- * no pasa por el helper `request` (que es solo para JSON).
- */
+/** Sube una foto al carrete. Usa multipart, por eso no pasa por el helper `request` (solo JSON). */
 export async function subirFotoCarrete(
   token: string,
   foto: Blob,

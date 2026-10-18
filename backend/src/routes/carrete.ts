@@ -4,14 +4,8 @@ import { config, almacenamientoConfigurado } from '../config.js';
 import { subirFoto, listarFotos, obtenerFoto } from '../lib/almacenamiento.js';
 
 /**
- * Carrete de fotos de los invitados.
- *
- * No hay login: el acceso es por un token largo que llega en el email de la
- * entrada. Con ese token, la persona puede ver cuántas fotos le quedan y
- * subir hasta `config.maxFotosCarrete` fotos, que se guardan en Appwrite.
- *
- *  - GET  /carrete/:token        -> estado (nombre, usadas, máximo)
- *  - POST /carrete/:token/foto   -> sube una foto (multipart, campo "foto")
+ * Carrete de fotos de los invitados. Sin login: el acceso es por un token
+ * largo que llega en el email de la entrada.
  */
 
 const paramsSchema = {
@@ -20,12 +14,9 @@ const paramsSchema = {
   properties: { token: { type: 'string', minLength: 8, maxLength: 40 } },
 };
 
-// Tipos de imagen que aceptamos. La compresión en cliente genera JPEG, pero
-// admitimos los habituales por si acaso.
 const TIPOS_PERMITIDOS = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 export async function carreteRoutes(app: FastifyInstance): Promise<void> {
-  // ---- Estado del carrete ----
   app.get<{ Params: { token: string } }>(
     '/carrete/:token',
     { schema: { params: paramsSchema } },
@@ -43,14 +34,11 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
         usadas: row.fotos_carrete,
         maximo: config.maxFotosCarrete,
         almacenamientoListo: almacenamientoConfigurado(),
-        // El carrete solo se activa cuando la persona ya ha entrado a la
-        // fiesta (su QR fue validado en la puerta).
         haEntrado: row.ha_entrado,
       });
     },
   );
 
-  // ---- Subir una foto ----
   app.post<{ Params: { token: string } }>(
     '/carrete/:token/foto',
     {
@@ -86,7 +74,6 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Ya has usado todas las fotos de tu carrete.' });
       }
 
-      // Leemos el fichero del multipart (campo "foto").
       const parte = await request.file();
       if (!parte) {
         return reply.status(400).send({ error: 'No se ha enviado ninguna foto.' });
@@ -97,9 +84,7 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
 
       const buffer = await parte.toBuffer();
 
-      // Reservamos el "hueco" de la foto de forma atómica ANTES de subir: así
-      // dos subidas simultáneas no se saltan el límite. El UPDATE condicional
-      // solo incrementa si aún queda cupo y devuelve el nuevo total.
+      // Reservamos el hueco de forma atómica ANTES de subir para que dos subidas simultáneas no se salten el límite.
       const reserva = await pool.query<{ fotos_carrete: number }>(
         `UPDATE asistentes SET fotos_carrete = fotos_carrete + 1
          WHERE id = $1 AND fotos_carrete < $2
@@ -117,8 +102,7 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
         const nombre = `${sanear(row.nombre)}-${numeroFoto}.jpg`;
         await subirFoto(buffer, nombre);
       } catch (err) {
-        // Si la subida falla, devolvemos el hueco reservado para que pueda
-        // reintentar sin perder una foto.
+        // Si la subida falla, devolvemos el hueco reservado para que pueda reintentar.
         await pool.query(
           'UPDATE asistentes SET fotos_carrete = GREATEST(fotos_carrete - 1, 0) WHERE id = $1',
           [row.id],
@@ -140,10 +124,7 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Galería compartida de la fiesta ----
-  // Protegida por un token (va en el email). Devuelve los IDs de las fotos;
-  // cada imagen se sirve por el endpoint de abajo (el backend hace de proxy,
-  // así la API key de Appwrite nunca llega al cliente).
+  // El backend hace de proxy de las imágenes para que la API key de Appwrite nunca llegue al cliente.
   app.get<{ Querystring: { token?: string } }>('/galeria', async (request, reply) => {
     if (!config.galeriaToken || request.query.token !== config.galeriaToken) {
       return reply.status(401).send({ error: 'No autorizado.' });
@@ -169,7 +150,6 @@ export async function carreteRoutes(app: FastifyInstance): Promise<void> {
     }
   });
 
-  // ---- Servir una foto concreta de la galería ----
   app.get<{ Params: { fileId: string }; Querystring: { token?: string } }>(
     '/galeria/foto/:fileId',
     {

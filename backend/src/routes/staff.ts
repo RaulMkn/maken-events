@@ -4,13 +4,7 @@ import { pool, type AsistenteRow } from '../db.js';
 import { COOKIE_STAFF, crearTokenStaff } from '../lib/sesion.js';
 import { protegerStaff } from '../lib/proteger-staff.js';
 
-/**
- * Rutas para el equipo de puerta (staff):
- *  - POST /staff/login     -> login con contraseña compartida (sin MFA)
- *  - POST /staff/logout
- *  - GET  /staff/sesion    -> saber si la sesión sigue viva
- *  - POST /staff/verificar -> valida el QR y marca la entrada como usada
- */
+/** Rutas del equipo de puerta (staff): login por contraseña compartida (sin MFA) y validación del QR. */
 
 interface LoginBody {
   password: string;
@@ -58,9 +52,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/sesion', { preHandler: protegerStaff }, async () => ({ autenticado: true }));
 
-  // ---- Lista de validación en puerta ----
-  // Devuelve SOLO id, nombre, de parte de quién y si está validado "en lista".
-  // Lo justo para repasar quién puede pasar y marcarlo. Nada de email ni pago.
+  // Devuelve solo id, nombre y de parte de quién: nada de email ni pago, por privacidad.
   app.get('/invitados', { preHandler: protegerStaff }, async () => {
     const { rows } = await pool.query<{
       id: string;
@@ -83,9 +75,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
     return { total: invitados.length, invitados };
   });
 
-  // ---- Marcar/desmarcar a un invitado como validado "en lista" ----
-  // Lo usa la gente de confianza para confirmar a los suyos. Es genérico: no
-  // guardamos quién valida, solo si está validado o no.
+  // No guardamos quién valida, solo si está validado o no.
   app.post<{ Body: { id: string; validado: boolean } }>(
     '/invitados/validar',
     {
@@ -115,7 +105,6 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Verificación del QR en la puerta ----
   app.post<{ Body: { token: string } }>(
     '/verificar',
     {
@@ -130,7 +119,6 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      // El QR contiene un código corto que buscamos directamente en la BD.
       const codigo = request.body.token.trim();
       const { rows } = await pool.query<AsistenteRow>(
         'SELECT * FROM asistentes WHERE token_qr = $1',
@@ -147,7 +135,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
 
       const nombre = `${row.nombre} ${row.apellidos}`.trim();
 
-      // Si ya había entrado, se rechaza (QR de un solo uso).
+      // El QR es de un solo uso.
       if (row.ha_entrado) {
         return reply.send({
           resultado: 'ya_entro',
@@ -157,8 +145,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      // Marcamos la entrada como usada. El UPDATE condicional (ha_entrado = false)
-      // evita una doble marca si dos escaneos llegan casi a la vez.
+      // UPDATE condicional (ha_entrado = false) para evitar doble marca si dos escaneos llegan a la vez.
       const upd = await pool.query(
         `UPDATE asistentes SET ha_entrado = true, entrado_en = now()
          WHERE id = $1 AND ha_entrado = false`,

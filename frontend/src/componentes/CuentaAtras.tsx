@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
 
-/**
- * Cuenta atrás hasta una fecha objetivo. Muestra días, horas, minutos y
- * segundos. Al llegar (o pasar) la fecha, muestra un mensaje de "en marcha".
- */
 export default function CuentaAtras({ objetivo }: { objetivo: Date }) {
   const [restante, setRestante] = useState(() => objetivo.getTime() - Date.now());
 

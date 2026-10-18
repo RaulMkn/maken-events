@@ -8,9 +8,6 @@ import {
   IconoCopa,
 } from '../componentes/Iconos.tsx';
 
-/**
- * Página de inicio: hero + información de la fiesta + concurso + registro.
- */
 export default function Landing() {
   return (
     <div className="tema-halloween">
@@ -72,31 +69,41 @@ export default function Landing() {
           Concurso de disfraces <span className="acento-creepy">¡vístete!</span>
         </h2>
         <p className="subtitulo" style={{ fontSize: '1rem' }}>
-          Un jurado elige a los tres mejores disfraces de la noche
+          Un jurado elige a los tres mejores disfraces de la noche. En juego:
         </p>
+
+        <ul className="botin">
+          <li className="botin-item">
+            <span className="botin-licor">Tequila de fresa</span>
+          </li>
+          <li className="botin-item">
+            <span className="botin-licor">Licor 43</span>
+          </li>
+          <li className="botin-item">
+            <span className="botin-licor">Baileys</span>
+          </li>
+        </ul>
+
         <div className="premios">
           <div className="premio">
             <span className="premio-puesto premio-puesto--1">1</span>
             <div>
-              <strong>Primer puesto</strong> — elige el premio que quiera entre los tres.
+              <strong>Primer puesto</strong> — elige la botella que quiera entre las tres.
             </div>
           </div>
           <div className="premio">
             <span className="premio-puesto premio-puesto--2">2</span>
             <div>
-              <strong>Segundo puesto</strong> — se lleva uno de los dos que queden.
+              <strong>Segundo puesto</strong> — se lleva una de las dos que queden.
             </div>
           </div>
           <div className="premio">
             <span className="premio-puesto premio-puesto--3">3</span>
             <div>
-              <strong>Tercer puesto</strong> — se queda con el premio restante.
+              <strong>Tercer puesto</strong> — se queda con la botella restante.
             </div>
           </div>
         </div>
-        <p className="subtitulo" style={{ fontSize: '0.9rem', marginTop: 16 }}>
-          Los premios se desvelan pronto, pero obvio habrá Jagger.
-        </p>
       </section>
 
       <div className="centrado" style={{ marginTop: 36 }}>

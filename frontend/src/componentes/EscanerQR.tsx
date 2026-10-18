@@ -4,24 +4,21 @@ import { verificarEntrada, logoutStaff, type ResultadoVerificacion } from '../ap
 import { IconoCheck, IconoAviso, IconoProhibido } from './Iconos.tsx';
 
 /**
- * Lector de QR para la puerta. Usa la cámara del dispositivo (trasera si hay).
- * Al leer un QR llama al backend, muestra el resultado unos segundos y luego
- * reanuda el escaneo. Evita procesar el mismo QR repetidamente.
+ * Lector de QR para la puerta (cámara trasera si hay). Al leer llama al
+ * backend, muestra el resultado unos segundos y evita reprocesar el mismo QR.
  */
 export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
-  // Verificación en curso (evita procesar dos lecturas a la vez).
+  // Evita procesar dos lecturas a la vez.
   const verificandoRef = useRef(false);
   // Último código mostrado, para no reprocesar el mismo QR en bucle.
   const ultimoRef = useRef<string>('');
-  // Temporizador que oculta el resultado tras unos segundos.
   const timerRef = useRef<number | null>(null);
 
   const [resultado, setResultado] = useState<ResultadoVerificacion | null>(null);
   const [errorCamara, setErrorCamara] = useState<string | null>(null);
 
-  // Cuánto tiempo permanece visible el resultado si no se escanea otro QR.
   const DURACION_RESULTADO_MS = 10000;
 
   useEffect(() => {
@@ -58,15 +55,14 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   async function onDetectar(dato: string) {
-    // Ignora si ya hay una verificación en curso o si es el mismo QR que se
-    // está mostrando ahora mismo (evita reprocesar el mismo en bucle).
+    // Ignora si ya hay una verificación en curso o si es el mismo QR en pantalla.
     if (verificandoRef.current) return;
     if (dato === ultimoRef.current) return;
 
     verificandoRef.current = true;
     ultimoRef.current = dato;
 
-    // Un escaneo nuevo sustituye al resultado anterior: cancelamos su timer.
+    // Un escaneo nuevo sustituye al anterior: cancelamos su timer.
     if (timerRef.current) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -77,8 +73,7 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
       setResultado(res);
       if (navigator.vibrate) navigator.vibrate(res.resultado === 'valida' ? 120 : 300);
     } catch {
-      // Fallo de red/servidor: no sabemos si la entrada vale. Pedimos reintentar
-      // y NO recordamos este código, para poder volver a escanearlo enseguida.
+      // Fallo de red: no recordamos el código para poder reintentar el mismo QR enseguida.
       setResultado({
         resultado: 'invalida',
         motivo: 'Sin conexión con el servidor. Reintenta el escaneo.',
@@ -89,8 +84,6 @@ export default function EscanerQR({ onLogout }: { onLogout: () => void }) {
       verificandoRef.current = false;
     }
 
-    // El resultado se queda 10 s; si antes se escanea otro QR distinto, este
-    // timer se cancela arriba y se muestra el nuevo de inmediato.
     timerRef.current = window.setTimeout(() => {
       setResultado(null);
       ultimoRef.current = '';

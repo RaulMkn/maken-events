@@ -1,9 +1,5 @@
 import { Link } from 'react-router-dom';
 
-/**
- * Home neutra: selector de eventos. De momento Halloween (activo) y
- * Carnaval (próximamente, no clicable). Tono sobrio, sin identidad de fiesta.
- */
 export default function Eventos() {
   return (
     <div className="contenedor">

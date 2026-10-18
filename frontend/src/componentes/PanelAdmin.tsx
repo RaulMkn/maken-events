@@ -14,9 +14,6 @@ import { agruparPorParteInteligente } from '../utils/agruparParte.ts';
 
 type Pestana = 'asistentes' | 'finanzas';
 
-/**
- * Panel admin: selector de fiesta + pestañas (asistentes / finanzas).
- */
 export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
   const [pestana, setPestana] = useState<Pestana>('asistentes');
   const [asistentes, setAsistentes] = useState<Asistente[]>([]);
@@ -124,7 +121,6 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
         </button>
       </div>
 
-      {/* Selector de fiesta (solo Halloween activo por ahora) + pestañas */}
       <div className="admin-controles">
         <select className="select-fiesta" defaultValue="halloween" aria-label="Fiesta">
           <option value="halloween">🎃 Fiesta de Halloween</option>

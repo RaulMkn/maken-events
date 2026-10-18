@@ -12,11 +12,8 @@ import LoginStaff from '../componentes/LoginStaff.tsx';
 import { agruparPorParteInteligente, tokensParte } from '../utils/agruparParte.ts';
 
 /**
- * Página de validación en puerta. Muestra SOLO el nombre de cada invitado y
- * de parte de quién viene: lo justo para comprobar quién puede pasar y quién
- * no, sin exponer emails ni estado de pago.
- *
- * Protegida con la misma contraseña del staff (equipo de puerta).
+ * Validación en puerta: muestra solo nombre y de parte de quién, sin email ni
+ * pago, por privacidad. Protegida con la contraseña del staff.
  */
 export default function Invitados() {
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
@@ -81,7 +78,7 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
     const nuevoValor = !inv.validado;
     setGuardando(inv.id);
     setError(null);
-    // Optimista: actualizamos la UI y revertimos si falla.
+    // Actualización optimista: revertimos si falla.
     setInvitados((prev) =>
       prev.map((i) => (i.id === inv.id ? { ...i, validado: nuevoValor } : i)),
     );
@@ -101,7 +98,7 @@ function ListaInvitados({ onLogout }: { onLogout: () => void }) {
     }
   }
 
-  // Filtro por nombre o por de parte de quién. Insensible a acentos/mayúsculas.
+  // Filtro insensible a acentos/mayúsculas.
   const filtrados = useMemo(() => {
     const q = tokensParte(busqueda);
     if (q.length === 0) return invitados;

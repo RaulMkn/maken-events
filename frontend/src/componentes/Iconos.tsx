@@ -1,10 +1,6 @@
 /**
- * Sistema de iconos de línea, dibujados a mano con un trazo coherente
- * (24x24, stroke 1.6, remates redondeados). Sustituyen a los emoji del
- * sistema, que no forman un set tipográficamente consistente.
- *
- * El color y el grosor se heredan por CSS (stroke: currentColor), así que
- * cada icono se tiñe según su contexto.
+ * Iconos de línea con trazo coherente (24x24, stroke 1.6), un set consistente
+ * frente a los emoji del sistema. Heredan color y grosor por CSS (currentColor).
  */
 import type { SVGProps } from 'react';
 

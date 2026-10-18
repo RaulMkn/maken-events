@@ -33,7 +33,6 @@ export default function DashboardFinanzas({ onNoAuth }: { onNoAuth: () => void }
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Formularios
   const [precioInput, setPrecioInput] = useState('');
   const [conceptoInput, setConceptoInput] = useState('');
   const [importeInput, setImporteInput] = useState('');
@@ -150,7 +149,6 @@ export default function DashboardFinanzas({ onNoAuth }: { onNoAuth: () => void }
         </div>
       )}
 
-      {/* Precio de entrada */}
       <section className="tarjeta" style={{ marginBottom: 20 }}>
         <h2>Precio de la entrada</h2>
         <p className="subtitulo" style={{ fontSize: '0.9rem', marginBottom: 8 }}>
@@ -176,7 +174,6 @@ export default function DashboardFinanzas({ onNoAuth }: { onNoAuth: () => void }
         </form>
       </section>
 
-      {/* Gastos */}
       <section className="tarjeta">
         <h2>Gastos</h2>
         {gastos.length === 0 ? (

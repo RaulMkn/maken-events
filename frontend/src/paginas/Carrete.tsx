@@ -9,10 +9,7 @@ import {
 import { comprimirImagen } from '../utils/comprimirImagen.ts';
 import { IconoCamara, IconoCandado, IconoFantasma } from '../componentes/Iconos.tsx';
 
-/**
- * Carrete de fotos del invitado. Acceso por token (sin login). Permite hacer
- * o elegir fotos hasta agotar el cupo; cada una se sube y se guarda.
- */
+/** Carrete de fotos del invitado. Acceso por token, sin login. */
 export default function Carrete() {
   const { token = '' } = useParams();
   const [estado, setEstado] = useState<EstadoCarrete | null>(null);
@@ -20,7 +17,7 @@ export default function Carrete() {
   const [noEncontrado, setNoEncontrado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
-  // Miniaturas de lo subido en esta sesión (object URLs locales).
+  // Miniaturas de esta sesión (object URLs locales).
   const [miniaturas, setMiniaturas] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -176,9 +173,12 @@ export default function Carrete() {
 
               {miniaturas.length > 0 && (
                 <div className="carrete-galeria">
-                  {miniaturas.map((url, i) => (
-                    <img key={url} src={url} alt={`Foto ${miniaturas.length - i}`} />
-                  ))}
+                  {miniaturas
+                    // Solo object URLs locales (blob:) generadas aquí, nunca texto externo.
+                    .filter((url) => url.startsWith('blob:'))
+                    .map((url, i) => (
+                      <img key={url} src={url} alt={`Foto ${miniaturas.length - i}`} />
+                    ))}
                 </div>
               )}
             </>

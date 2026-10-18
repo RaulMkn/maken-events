@@ -8,7 +8,7 @@ import { config } from '../config.js';
  * generadas con scripts/gen-admin.ts.
  */
 
-// Ventana de tolerancia de 1 paso (±30s) para el reloj del móvil.
+// Ventana de tolerancia de 1 paso (±30s) para el desfase de reloj del móvil.
 authenticator.options = { window: 1 };
 
 export async function verificarPassword(passwordPlano: string): Promise<boolean> {
@@ -22,7 +22,7 @@ export async function verificarPassword(passwordPlano: string): Promise<boolean>
 
 export function verificarTotp(codigo: string): boolean {
   if (!config.admin.totpSecret) return false;
-  // Normalizamos: quitamos espacios que algunos apps añaden.
+  // Quitamos espacios que algunas apps añaden al código.
   const limpio = codigo.replace(/\s+/g, '');
   try {
     return authenticator.verify({ token: limpio, secret: config.admin.totpSecret });

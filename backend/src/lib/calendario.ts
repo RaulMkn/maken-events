@@ -1,12 +1,9 @@
 import { config } from '../config.js';
 
 /**
- * Genera un fichero iCalendar (.ics) con el evento de la fiesta, para que el
- * invitado lo añada a su calendario con un toque desde el email.
- *
- * Las horas van en UTC (sufijo Z). La fiesta es el sábado 31 de octubre de
- * 2026, de 23:00 a 04:00 hora de Madrid. El cambio a horario de invierno es
- * el 25/10/2026, así que el 31 ya es CET (UTC+1) -> 22:00 a 03:00 UTC.
+ * Genera el .ics del evento. Las horas van en UTC: el 31/10/2026 ya es CET
+ * (el cambio a horario de invierno es el 25/10), así que 23:00-04:00 Madrid
+ * equivale a 22:00-03:00 UTC.
  */
 
 const INICIO_UTC = '20261031T220000Z';
@@ -17,7 +14,7 @@ export function generarIcs(): string {
   const descripcion =
     'Tu entrada llega por email con un QR. La dirección exacta va en ese correo.';
 
-  // CRLF obligatorio según la especificación iCalendar (RFC 5545).
+  // CRLF obligatorio según iCalendar (RFC 5545).
   const lineas = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',

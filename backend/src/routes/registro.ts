@@ -3,10 +3,7 @@ import { nanoid } from 'nanoid';
 import { pool } from '../db.js';
 import { limpiarTexto, normalizarEmail, emailValido } from '../lib/validacion.js';
 
-/**
- * Endpoint público de registro de asistentes.
- * Validación de esquema por Fastify + saneado + control de duplicados.
- */
+/** Endpoint público de registro de asistentes. */
 
 interface RegistroBody {
   nombre: string;
@@ -21,7 +18,6 @@ interface RegistroBody {
 const registroSchema = {
   body: {
     type: 'object',
-    // apellidos ya no es obligatorio; el resto sí.
     required: ['nombre', 'email', 'disfrazado', 'deParteDe', 'aceptaCondiciones'],
     additionalProperties: false,
     properties: {
@@ -30,16 +26,15 @@ const registroSchema = {
       email: { type: 'string', minLength: 3, maxLength: 254 },
       disfrazado: { type: 'boolean' },
       disfraz: { type: 'string', maxLength: 200 },
-      // De parte de quién viene (texto libre, obligatorio): la fiesta es cerrada.
+      // Obligatorio porque la fiesta es cerrada.
       deParteDe: { type: 'string', minLength: 1, maxLength: 120 },
-      // Debe ser exactamente true: no se acepta el registro sin aceptar condiciones.
       aceptaCondiciones: { type: 'boolean', const: true },
     },
   },
 };
 
 export async function registroRoutes(app: FastifyInstance): Promise<void> {
-  // Rate limit más estricto en el registro para evitar spam de altas.
+  // Rate limit estricto en el registro para evitar spam de altas.
   app.post<{ Body: RegistroBody }>(
     '/registro',
     {
@@ -53,7 +48,7 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
       const apellidos = limpiarTexto(request.body.apellidos ?? '');
       const email = normalizarEmail(request.body.email);
       const disfrazado = request.body.disfrazado;
-      // Si va disfrazado/a pero no indica de qué (sorpresa), guardamos null.
+      // Si no indica de qué se disfraza (sorpresa), guardamos null.
       const disfrazTexto = disfrazado ? limpiarTexto(request.body.disfraz ?? '') : '';
       const disfraz = disfrazTexto.length > 0 ? disfrazTexto : null;
       const deParteDe = limpiarTexto(request.body.deParteDe);
@@ -68,9 +63,6 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Indica de parte de quién vienes.' });
       }
 
-      // El disfraz es opcional aunque vaya disfrazado/a: puede dejarlo en
-      // blanco para mantener la sorpresa. No se bloquea el registro.
-
       // Redundante con el esquema (const: true), pero explícito por seguridad.
       if (request.body.aceptaCondiciones !== true) {
         return reply
@@ -78,7 +70,6 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Debes aceptar las condiciones para registrarte.' });
       }
 
-      // ¿Ya existe ese email?
       const existe = await pool.query('SELECT id FROM asistentes WHERE email = $1', [email]);
       if (existe.rowCount && existe.rowCount > 0) {
         return reply

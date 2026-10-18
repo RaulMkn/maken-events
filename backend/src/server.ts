@@ -19,33 +19,24 @@ import { carreteRoutes } from './routes/carrete.js';
 const app = Fastify({
   logger: {
     level: config.isProd ? 'info' : 'debug',
-    // No registramos cuerpos de peticiones para no volcar datos personales en logs.
+    // No volcamos cuerpos de peticiones en logs por privacidad.
     redact: ['req.headers.authorization', 'req.headers.cookie'],
   },
-  // Confiamos en el proxy de la plataforma (Heroku) para IP real y protocolo.
+  // Confiamos en el proxy de Heroku para IP real y protocolo.
   trustProxy: true,
-  bodyLimit: 64 * 1024, // 64 KB: los formularios son pequeños, cortamos payloads gigantes.
+  bodyLimit: 64 * 1024,
 });
 
-// Inicializamos el esquema de la base de datos antes de aceptar tráfico.
 await initDb();
 
-// ---- Seguridad base ----
-
-// Cabeceras de seguridad. Como ahora Fastify sirve también el HTML del
-// frontend, la CSP permite recursos propios + estilos inline e imágenes
-// data/blob (SweetAlert2 usa estilos inline; el QR se muestra como data URL).
 await app.register(helmet, {
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      // El lector de QR (qr-scanner) usa un Web Worker que puede cargarse
-      // como blob:, por eso permitimos scriptSrc/workerSrc con blob:.
+      // El lector de QR usa un Web Worker que se carga como blob:.
       scriptSrc: ["'self'", 'blob:'],
       workerSrc: ["'self'", 'blob:'],
       childSrc: ["'self'", 'blob:'],
-      // Fuentes de Google: la hoja de estilos viene de fonts.googleapis.com
-      // y los ficheros de fuente de fonts.gstatic.com.
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
@@ -77,8 +68,6 @@ await app.register(rateLimit, {
   ban: 3,
 });
 
-// Subida de ficheros (fotos del carrete). Las imágenes ya van comprimidas
-// desde el cliente; 12 MB de margen cubre fotos grandes sin comprimir.
 await app.register(multipart, {
   limits: {
     fileSize: 12 * 1024 * 1024,
@@ -86,10 +75,8 @@ await app.register(multipart, {
   },
 });
 
-// ---- Salud ----
 app.get('/api/health', async () => ({ ok: true }));
 
-// ---- Rutas de la API ----
 await app.register(registroRoutes, { prefix: '/api' });
 await app.register(authRoutes, { prefix: '/api/admin' });
 await app.register(adminRoutes, { prefix: '/api/admin' });
@@ -97,8 +84,6 @@ await app.register(entradaRoutes, { prefix: '/api' });
 await app.register(staffRoutes, { prefix: '/api/staff' });
 await app.register(carreteRoutes, { prefix: '/api' });
 
-// ---- Frontend estático (SPA de React) ----
-// El build del frontend se copia a backend/public durante el build de Heroku.
 const aqui = dirname(fileURLToPath(import.meta.url));
 const dirPublico = join(aqui, '..', 'public');
 
@@ -108,8 +93,7 @@ if (existsSync(dirPublico)) {
     prefix: '/',
   });
 
-  // Fallback SPA: cualquier ruta no-API devuelve index.html para que
-  // funcione el router del cliente (/registro, /admin...).
+  // Fallback SPA: las rutas no-API devuelven index.html para el router del cliente.
   app.setNotFoundHandler((request, reply) => {
     if (request.raw.url && request.raw.url.startsWith('/api')) {
       return reply.status(404).send({ error: 'No encontrado.' });
@@ -120,7 +104,6 @@ if (existsSync(dirPublico)) {
   app.log.warn(`No existe ${dirPublico}; el frontend no se servirá (¿falta el build?).`);
 }
 
-// ---- Arranque ----
 try {
   await app.listen({ port: config.port, host: '0.0.0.0' });
   app.log.info(`Servidor escuchando en el puerto ${config.port}`);

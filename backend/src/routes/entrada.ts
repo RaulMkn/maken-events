@@ -3,9 +3,8 @@ import { pool, type AsistenteRow } from '../db.js';
 import { protegerAdmin } from '../lib/proteger-admin.js';
 
 /**
- * Consulta de una entrada por su código de QR (solo lectura, no marca entrada).
- * Protegido con sesión admin. La validación real de puerta (que marca la
- * entrada como usada) está en /api/staff/verificar.
+ * Consulta de una entrada por su QR (solo lectura, no marca entrada). La
+ * validación de puerta que marca la entrada está en /api/staff/verificar.
  */
 export async function entradaRoutes(app: FastifyInstance): Promise<void> {
   app.post<{ Body: { token: string } }>(

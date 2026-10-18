@@ -11,12 +11,7 @@ import { protegerAdmin } from '../lib/proteger-admin.js';
 import { enviarEmailEntrada } from '../lib/email.js';
 import { limpiarTexto } from '../lib/validacion.js';
 
-/**
- * Endpoints del panel admin. Todos protegidos con sesión admin válida.
- *  - GET  /asistentes                    -> listado
- *  - POST /asistentes/:id/confirmar-pago -> marca pagado, genera QR y envía email
- *  - POST /asistentes/:id/reenviar-email -> reenvía el email de una entrada ya confirmada
- */
+/** Endpoints del panel admin. Todos protegidos con sesión admin válida. */
 
 interface AsistenteDTO {
   id: string;
@@ -55,10 +50,8 @@ function aDTO(row: AsistenteRow): AsistenteDTO {
 }
 
 export async function adminRoutes(app: FastifyInstance): Promise<void> {
-  // Todas las rutas de este plugin exigen sesión admin.
   app.addHook('preHandler', protegerAdmin);
 
-  // ---- Listado de asistentes ----
   app.get('/asistentes', async () => {
     const { rows } = await pool.query<AsistenteRow>(
       'SELECT * FROM asistentes ORDER BY creado_en DESC',
@@ -77,7 +70,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     return { resumen, asistentes };
   });
 
-  // ---- Exportar asistentes a CSV (copia de seguridad / lista para la puerta) ----
   app.get('/asistentes.csv', async (_request, reply) => {
     const { rows } = await pool.query<AsistenteRow>(
       'SELECT * FROM asistentes ORDER BY de_parte_de NULLS LAST, creado_en',
@@ -129,7 +121,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       .send(csv);
   });
 
-  // ---- Confirmar pago: genera QR + envía email ----
   app.post<{ Params: { id: string } }>(
     '/asistentes/:id/confirmar-pago',
     {
@@ -160,16 +151,12 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           .send({ error: 'Este asistente ya tiene el pago confirmado.' });
       }
 
-      // Código corto y aleatorio para el QR. Al ser corto, el QR es poco denso
-      // y se lee bien desde la pantalla de un móvil. La validez se comprueba
-      // buscando este código en la BD (no hace falta que sea un JWT).
+      // Código corto para que el QR sea poco denso y se lea bien en pantalla.
       const tokenQr = nanoid(16);
-      // Token del carrete de fotos: largo (difícil de adivinar) porque la URL
-      // va en el email y no hay login. Reutilizamos el existente si ya lo tenía.
+      // Token del carrete largo (difícil de adivinar) porque va en el email sin login.
       const tokenCarrete = row.token_carrete ?? nanoid(21);
       const pagadoEn = new Date().toISOString();
-      // Guardamos el precio vigente en este momento: cada asistente "vale" lo
-      // que pagó, aunque el precio del evento cambie después.
+      // Guardamos el precio vigente ahora: cada asistente vale lo que pagó aunque el precio cambie después.
       const precio = await precioEntradaCentimos();
 
       await pool.query(
@@ -180,8 +167,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
         [tokenQr, pagadoEn, precio, tokenCarrete, row.id],
       );
 
-      // Enviamos el email con el QR. Si falla el envío, el pago queda confirmado
-      // igual (no revertimos) pero informamos para poder reenviar luego.
+      // Si falla el envío, el pago queda confirmado igual (no revertimos) y se informa para reenviar luego.
       try {
         await enviarEmailEntrada({
           nombre: row.nombre,
@@ -194,8 +180,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
         request.log.info({ asistenteId: row.id }, 'Pago confirmado y email enviado');
         return reply.send({ ok: true, emailEnviado: true });
       } catch (err) {
-        // Registramos solo el mensaje del error, no el objeto completo, que
-        // en errores de SMTP puede contener la dirección del destinatario.
+        // Solo el mensaje del error, no el objeto completo, que podría incluir la dirección del destinatario.
         request.log.error(
           { motivo: err instanceof Error ? err.message : 'desconocido', asistenteId: row.id },
           'Pago confirmado pero falló el email',
@@ -210,7 +195,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Reenviar email de una entrada ya confirmada ----
   app.post<{ Params: { id: string } }>(
     '/asistentes/:id/reenviar-email',
     {
@@ -261,7 +245,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Eliminar un asistente ----
   app.delete<{ Params: { id: string } }>(
     '/asistentes/:id',
     {
@@ -283,7 +266,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Ajustes: precio de entrada ----
   app.get('/ajustes', async () => {
     const precioCentimos = await precioEntradaCentimos();
     return { precioEntradaCentimos: precioCentimos };
@@ -298,7 +280,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
           required: ['precioEntradaCentimos'],
           additionalProperties: false,
           properties: {
-            // Precio en céntimos: entero >= 0, tope razonable (1.000 €).
             precioEntradaCentimos: { type: 'integer', minimum: 0, maximum: 100000 },
           },
         },
@@ -310,7 +291,6 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Gastos ----
   app.get('/gastos', async () => {
     const { rows } = await pool.query<GastoRow>(
       'SELECT * FROM gastos ORDER BY creado_en DESC',
@@ -371,10 +351,8 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     },
   );
 
-  // ---- Resumen financiero ----
   app.get('/finanzas', async () => {
-    // Ingresos: suma de lo realmente pagado por los asistentes confirmados.
-    // Si algún confirmado antiguo no tuviera precio guardado, cuenta como 0.
+    // Ingresos: suma de lo realmente pagado; un confirmado sin precio cuenta como 0.
     const ingresosQ = await pool.query<{ total: string | null }>(
       `SELECT COALESCE(SUM(precio_pagado_centimos), 0) AS total
        FROM asistentes WHERE estado_pago = 'pagado'`,
