@@ -44,7 +44,7 @@ de principio a fin, sin pasarela de pago (el pago se confirma a mano):
 - El disfraz es opcional: se puede dejar en blanco para mantener la sorpresa.
 - **Galería compartida** de la noche (acceso por token del email) y **cuenta
   atrás** en la landing. El email incluye además un **.ics** para añadir la
-  fiesta al calendario y, si se configura, un enlace a la **playlist** de Spotify.
+  fiesta al calendario.
 - Dashboard financiero: precio de entrada configurable, gastos, ingresos
   (por lo realmente pagado por cada asistente) y beneficio neto.
 - Exportación de la lista de asistentes a CSV (incluye estado de validación).
@@ -147,7 +147,6 @@ no en un fichero `.env`.
 | `APPWRITE_API_KEY` | API key de Appwrite con scope `files.write` (y `files.read` para la galería) |
 | `APPWRITE_BUCKET_ID` | ID del bucket de Storage donde se guardan las fotos |
 | `MAX_FOTOS_CARRETE` | Nº máximo de fotos por invitado (por defecto 10) |
-| `SPOTIFY_PLAYLIST_URL` | Enlace a la playlist colaborativa (se incluye en el email, opcional) |
 | `GALERIA_TOKEN` | Token de acceso a la galería compartida (va en el email; vacío = galería deshabilitada) |
 
 ## Scripts

@@ -71,8 +71,6 @@ export const config = {
 
   maxFotosCarrete: Number(process.env.MAX_FOTOS_CARRETE ?? 10),
 
-  spotifyPlaylistUrl: optional('SPOTIFY_PLAYLIST_URL'),
-
   // El token va en el email; si está vacío, la galería se deshabilita para no exponer las fotos a cualquiera.
   galeriaToken: optional('GALERIA_TOKEN'),
 } as const;

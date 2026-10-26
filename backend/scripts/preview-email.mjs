@@ -149,22 +149,6 @@ const html = `
           </tr>
           <tr>
             <td style="padding:16px 32px 0 32px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c2016; border:1px solid #1db95433; border-radius:12px;">
-                <tr>
-                  <td style="padding:18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.6; text-align:center;">
-                    <div style="font-size:22px; margin-bottom:6px;">🎵</div>
-                    <strong style="color:#1ed760;">La playlist es cosa de todos</strong><br>
-                    <span style="color:#b3a4cc;">Añade tus temazos antes de la noche. Que no falte tu canción.</span>
-                    <div style="margin-top:14px;">
-                      <a href="https://open.spotify.com/playlist/EJEMPLO" style="display:inline-block; background:#1ed760; color:#06220f; text-decoration:none; font-weight:bold; padding:11px 22px; border-radius:999px;">Abrir la playlist</a>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:16px 32px 0 32px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#080611; border:1px solid #2a2140; border-radius:12px;">
                 <tr>
                   <td style="padding:16px 18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#b3a4cc; line-height:1.6; text-align:center;">

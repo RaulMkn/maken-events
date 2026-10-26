@@ -69,26 +69,6 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
             </tr>`
     : '';
 
-  const bloquePlaylist = config.spotifyPlaylistUrl
-    ? `
-            <tr>
-              <td style="padding:16px 32px 0 32px;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c2016; border:1px solid #1db95433; border-radius:12px;">
-                  <tr>
-                    <td style="padding:18px; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#f4eefb; line-height:1.6; text-align:center;">
-                      <div style="font-size:22px; margin-bottom:6px;">🎵</div>
-                      <strong style="color:#1ed760;">Que nadie se queje de la musica pls</strong><br>
-                      <span style="color:#b3a4cc;">La administración (Maken) se reserva el derecho a eliminar canciones que no sean de fiesta.</span>
-                      <div style="margin-top:14px;">
-                        <a href="${config.spotifyPlaylistUrl}" style="display:inline-block; background:#1ed760; color:#06220f; text-decoration:none; font-weight:bold; padding:11px 22px; border-radius:999px;">Abrir la playlist</a>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>`
-    : '';
-
   const bloqueGaleria = urlGaleria
     ? `
             <tr>
@@ -208,7 +188,6 @@ export async function enviarEmailEntrada(datos: DatosEntrada): Promise<void> {
 ${bloqueCarrete}
 ${bloqueGaleria}
 ${bloqueConcurso}
-${bloquePlaylist}
 ${bloqueCalendario}
             <tr>
               <td style="padding:24px 32px 36px 32px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#6d5f88; text-align:center;">
@@ -235,7 +214,7 @@ Dónde: C. Toledo, 36, Local 5, 28981 Parla (Madrid).
 
 Enseña el código QR adjunto en la puerta. Es personal e intransferible.
 El QR solo sirve una vez: al escanearlo queda usado.
-${urlCarrete ? `\nTu carrete de fotos (${config.maxFotosCarrete} fotos, se activa al entrar): ${urlCarrete}` : ''}${config.spotifyPlaylistUrl ? `\nPlaylist colaborativa: ${config.spotifyPlaylistUrl}` : ''}
+${urlCarrete ? `\nTu carrete de fotos (${config.maxFotosCarrete} fotos, se activa al entrar): ${urlCarrete}` : ''}
 
 Concurso de disfraces: el jurado premia a los tres mejores. En juego, una botella de tequila de fresa, una de Licor 43 y una de Baileys. El 1.º elige, el 2.º escoge entre las dos que queden y el 3.º se lleva la restante.
 
