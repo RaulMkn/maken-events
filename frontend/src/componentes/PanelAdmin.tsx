@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   listarAsistentes,
   confirmarPago,
@@ -14,9 +14,11 @@ import DashboardFinanzas from './DashboardFinanzas.tsx';
 import { agruparPorParteInteligente } from '../utils/agruparParte.ts';
 
 type Pestana = 'asistentes' | 'finanzas';
+type FiltroPago = 'todos' | 'pagado' | 'pendiente';
 
 export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
   const [pestana, setPestana] = useState<Pestana>('asistentes');
+  const [filtroPago, setFiltroPago] = useState<FiltroPago>('todos');
   const [asistentes, setAsistentes] = useState<Asistente[]>([]);
   const [resumen, setResumen] = useState<ResumenAsistentes | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -134,6 +136,14 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
     onLogout();
   }
 
+  const asistentesFiltrados = useMemo(
+    () =>
+      filtroPago === 'todos'
+        ? asistentes
+        : asistentes.filter((a) => a.estadoPago === filtroPago),
+    [asistentes, filtroPago],
+  );
+
   return (
     <div className="contenedor-ancho">
       <div className="cabecera">
@@ -174,6 +184,32 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
 
         {pestana === 'asistentes' && (
           <>
+            <div className="tabs" role="tablist" aria-label="Filtrar por pago">
+              <button
+                className={`tab ${filtroPago === 'todos' ? 'tab--activa' : ''}`}
+                onClick={() => setFiltroPago('todos')}
+                role="tab"
+                aria-selected={filtroPago === 'todos'}
+              >
+                Todos
+              </button>
+              <button
+                className={`tab ${filtroPago === 'pagado' ? 'tab--activa' : ''}`}
+                onClick={() => setFiltroPago('pagado')}
+                role="tab"
+                aria-selected={filtroPago === 'pagado'}
+              >
+                Pagados
+              </button>
+              <button
+                className={`tab ${filtroPago === 'pendiente' ? 'tab--activa' : ''}`}
+                onClick={() => setFiltroPago('pendiente')}
+                role="tab"
+                aria-selected={filtroPago === 'pendiente'}
+              >
+                Pendientes
+              </button>
+            </div>
             <button className="boton boton-secundario boton-pequeno" onClick={cargar}>
               Actualizar
             </button>
@@ -224,8 +260,14 @@ export default function PanelAdmin({ onLogout }: { onLogout: () => void }) {
         <p className="subtitulo">Cargando…</p>
       ) : asistentes.length === 0 ? (
         <p className="subtitulo">Todavía no hay nadie registrado.</p>
+      ) : asistentesFiltrados.length === 0 ? (
+        <p className="subtitulo">
+          {filtroPago === 'pagado'
+            ? 'Nadie tiene el pago confirmado todavía.'
+            : 'No hay nadie con el pago pendiente.'}
+        </p>
       ) : (
-        agruparPorParteInteligente(asistentes, (a) => a.deParteDe).map((grupo) => {
+        agruparPorParteInteligente(asistentesFiltrados, (a) => a.deParteDe).map((grupo) => {
           const lista = grupo.elementos;
           return (
           <div key={grupo.nombre}>
