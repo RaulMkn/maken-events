@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
-import { pool } from '../db.js';
+import { pool, registroAbierto } from '../db.js';
 import { limpiarTexto, normalizarEmail, emailValido } from '../lib/validacion.js';
 
 /** Endpoint público de registro de asistentes. */
@@ -34,6 +34,7 @@ const registroSchema = {
 };
 
 export async function registroRoutes(app: FastifyInstance): Promise<void> {
+
   // Rate limit estricto en el registro para evitar spam de altas.
   app.post<{ Body: RegistroBody }>(
     '/registro',
@@ -44,6 +45,10 @@ export async function registroRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
+      if (!(await registroAbierto())) {
+        return reply.status(403).send({ error: 'El registro para esta fiesta ya está cerrado.' });
+      }
+
       const nombre = limpiarTexto(request.body.nombre);
       const apellidos = limpiarTexto(request.body.apellidos ?? '');
       const email = normalizarEmail(request.body.email);

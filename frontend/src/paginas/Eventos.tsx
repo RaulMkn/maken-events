@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 export default function Eventos() {
   return (
     <div className="contenedor">
@@ -11,16 +9,16 @@ export default function Eventos() {
       </header>
 
       <div className="eventos-grid aparece" style={{ animationDelay: '0.08s' }}>
-        <Link to="/halloween" className="evento-card evento-card--activo">
-          <span className="evento-badge evento-badge--activo">Abierto</span>
+        <div
+          className="evento-card evento-card--proximo"
+          aria-disabled="true"
+          role="link"
+          tabIndex={-1}
+        >
+          <span className="evento-badge evento-badge--proximo">Registro cerrado</span>
           <div className="evento-titulo">Halloween 4.0</div>
-          <div className="evento-meta">31 de octubre · Parla · Registro abierto</div>
-          <span className="evento-flecha" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </span>
-        </Link>
+          <div className="evento-meta">31 de octubre · Parla</div>
+        </div>
 
         <div
           className="evento-card evento-card--proximo"

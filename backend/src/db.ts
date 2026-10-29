@@ -100,6 +100,11 @@ export async function guardarAjuste(clave: string, valor: string): Promise<void>
   );
 }
 
+/** ¿Admite el evento nuevos registros? Sin ajuste explícito, está cerrado. */
+export async function registroAbierto(): Promise<boolean> {
+  return (await leerAjuste('registro_abierto')) === 'true';
+}
+
 /** Precio de entrada actual en céntimos (por defecto 700 = 7 €). */
 export async function precioEntradaCentimos(): Promise<number> {
   const v = await leerAjuste('precio_entrada_centimos');
